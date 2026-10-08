@@ -4,16 +4,15 @@
 
 This project is building a Project Management App. Key features:
 - A user can sign in
-- When signed in, the user sees a Kanban board representing their project
-- The Kanban board has fixed columns that can be renamed
-- The cards on the Kanban board can be moved with drag and drop, and edited
-- There is an AI chat feature in a sidebar; the AI is able to create / edit / move one or more cards
+- When signed in, the user sees a board representing their project
+- The board has fixed columns that can be renamed
+- The cards on the board can be moved with drag and drop, and edited
 
 ## Limitations
 
 For the MVP, there will only be a user sign in (hardcoded to 'user' and 'password') but the database will support multiple users for future.
 
-For the MVP, there will only be 1 Kanban board per signed in user.
+For the MVP, there will only be 1 board per signed in user.
 
 For the MVP, this will run locally (in a docker container)
 
@@ -22,11 +21,10 @@ For the MVP, this will run locally (in a docker container)
 - NextJS frontend
 - Python FastAPI backend, including serving the static NextJS site at /
 - Everything packaged into a Docker container
-- Use "uv" as the package manager for python in the Docker container
-- Use OpenRouter for the AI calls. An OPENROUTER_API_KEY is in .env in the project root
-- Use `openai/gpt-oss-120b` as the model
+- Use pip with a requirements.txt (pinned versions) for Python dependencies
+- Backend tests run inside the Docker container (no local Python required)
 - Use SQLLite local database for the database, creating a new db if it doesn't exist
-- Start and Stop server scripts for Mac, PC, Linux in scripts/
+- Start and Stop server scripts for Mac, PC, Linux in scripts/ (PowerShell for Windows)
 
 ## Starting Point
 

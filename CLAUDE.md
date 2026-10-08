@@ -4,17 +4,53 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Read first
 
-- `AGENTS.md` (root) holds the business requirements, technical decisions, color scheme and coding standards. Follow it; it is authoritative.
-- `docs/PLAN.md` is the phased execution plan (Parts 1-10). Work proceeds part by part, and several parts (1: plan, 5: database schema) require explicit user sign-off before moving on. Keep progress checklists in `docs/`.
+- `AGENTS.md` (root) is authoritative. This file mirrors its specs below; if they ever disagree, AGENTS.md wins.
+- `docs/PLAN.md` is the phased execution plan (Parts 1-7). Work proceeds part by part, and Part 1 (plan) and Part 5 (database schema) require explicit user sign-off before moving on. All planning and progress documents (including checklists) live in `docs/`.
 - `backend/AGENTS.md`, `scripts/AGENTS.md` (and `frontend/AGENTS.md` once created in Part 1) describe each subdirectory and should be kept up to date as code is added.
 
-Key standards from `AGENTS.md`: keep it simple, no over-engineering or unnecessary defensive code, no extra features, minimal README, no emojis ever, and prove root cause with evidence before fixing an issue.
+## Business requirements
+
+A Project Management MVP web app:
+
+- A user can sign in.
+- When signed in, the user sees a board representing their project.
+- The board has fixed columns that can be renamed.
+- The cards on the board can be moved with drag and drop, and edited.
+
+## MVP limitations
+
+- Only one sign in, hardcoded to `user` / `password`, but the database must support multiple users for the future.
+- Only 1 board per signed in user.
+- Runs locally, in a Docker container.
+
+## Technical decisions
+
+- Next.js frontend.
+- Python FastAPI backend, which also serves the static Next.js site at `/`.
+- Everything packaged into a single Docker container.
+- Python dependencies managed with pip and a `requirements.txt` with pinned versions.
+- Backend tests run inside the Docker container; no local Python install is required.
+- SQLite local database, created if it does not exist.
+- Start and stop server scripts for Mac, Windows and Linux in `scripts/` (PowerShell `.ps1` for Windows).
+
+## Color scheme
+
+- Accent Yellow `#ecad0a`: accent lines, highlights
+- Blue Primary `#209dd7`: links, key sections
+- Purple Secondary `#753991`: submit buttons, important actions
+- Dark Navy `#032147`: main headings
+- Gray Text `#888888`: supporting text, labels
+
+## Coding standards
+
+1. Use the latest versions of libraries and idiomatic approaches.
+2. Keep it simple: never over-engineer, always simplify, no unnecessary defensive programming, no extra features.
+3. Be concise. Keep the README minimal. No emojis, ever.
+4. When hitting issues, identify the root cause before trying a fix. Do not guess: prove it with evidence, then fix the root cause.
 
 ## Current state
 
-Only the frontend exists. `backend/` and `scripts/` contain placeholder AGENTS.md files; Docker, FastAPI, SQLite, auth and AI chat are still to be built per `docs/PLAN.md`.
-
-Target architecture: a single Docker container where a FastAPI backend (managed with `uv`) serves the statically exported Next.js build at `/` plus JSON API routes, persists boards in a SQLite DB (created if missing, multi-user schema, one board per user, hardcoded `user`/`password` login for the MVP), and calls OpenRouter (`openai/gpt-oss-120b`, key in root `.env`) with the board JSON + chat history, receiving Structured Outputs that contain a reply and an optional board update. Start/stop scripts for Mac, Windows and Linux go in `scripts/`.
+Only the frontend exists, as a pure frontend demo not yet set up for Docker. `backend/` and `scripts/` contain placeholder AGENTS.md files; Docker, FastAPI, SQLite, sign in and persistence are still to be built per `docs/PLAN.md`.
 
 ## Frontend commands
 
@@ -35,6 +71,6 @@ npx playwright test tests/kanban.spec.ts -g "test name"
 ## Frontend architecture
 
 - Next.js 16 App Router, React 19, Tailwind v4, `@dnd-kit` for drag and drop. `@/` aliases `src/`.
-- `src/lib/kanban.ts` defines the data model and pure logic: `BoardData` is `{ columns: Column[], cards: Record<id, Card> }`, where each column holds an ordered `cardIds` list (cards are normalized, not nested). `moveCard` handles reordering within a column and moving across columns (dropping onto a column id appends; onto a card id inserts at that position). This shape is the natural basis for the backend schema and the JSON sent to the AI.
+- `src/lib/kanban.ts` defines the data model and pure logic: `BoardData` is `{ columns: Column[], cards: Record<id, Card> }`, where each column holds an ordered `cardIds` list (cards are normalized, not nested). `moveCard` handles reordering within a column and moving across columns (dropping onto a column id appends; onto a card id inserts at that position). This shape is the natural basis for the backend schema.
 - `src/components/KanbanBoard.tsx` owns all board state (`useState` seeded from `initialData`, no persistence yet) and passes handlers (rename column, add/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Wiring to the backend API in Part 7 replaces this local state source.
 - Columns are fixed (renamable, not addable/removable).
