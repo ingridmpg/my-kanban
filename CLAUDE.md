@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `AGENTS.md` (root) is authoritative. This file mirrors its specs below; if they ever disagree, AGENTS.md wins.
 - `docs/PLAN.md` is the phased execution plan (Parts 1-7). Work proceeds part by part, and Part 1 (plan) and Part 5 (database schema) require explicit user sign-off before moving on. All planning and progress documents (including checklists) live in `docs/`.
-- `backend/AGENTS.md`, `scripts/AGENTS.md` (and `frontend/AGENTS.md` once created in Part 1) describe each subdirectory and should be kept up to date as code is added.
+- `backend/AGENTS.md`, `frontend/AGENTS.md` and `scripts/AGENTS.md` describe each subdirectory (each is imported by a `CLAUDE.md` next to it) and should be kept up to date as code is added.
 
 ## Business requirements
 
