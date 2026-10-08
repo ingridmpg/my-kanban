@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("loads the kanban board", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Kanban Studio" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "My Trello" })).toBeVisible();
   await expect(page.locator('[data-testid^="column-"]')).toHaveCount(5);
 });
 
