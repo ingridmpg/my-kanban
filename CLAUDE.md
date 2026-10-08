@@ -50,7 +50,7 @@ A Project Management MVP web app:
 
 ## Current state
 
-Only the frontend exists, as a pure frontend demo not yet set up for Docker. `backend/` and `scripts/` contain placeholder AGENTS.md files; Docker, FastAPI, SQLite, sign in and persistence are still to be built per `docs/PLAN.md`.
+Parts 1-2 are done. The Docker container runs a FastAPI scaffold (`/api/health` and a hello world page at `/`), started and stopped with the scripts in `scripts/`; backend tests run with `docker run --rm my-trello pytest`. The frontend is still a standalone demo, not yet served by the container. Sign in, SQLite and persistence are still to be built per `docs/PLAN.md`.
 
 ## Frontend commands
 

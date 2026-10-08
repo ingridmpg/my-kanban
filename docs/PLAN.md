@@ -6,7 +6,7 @@ Work proceeds part by part. Each part has a checklist (checked off as work is do
 
 - **Single container, single port.** FastAPI serves the API under `/api/*` and the statically exported Next.js build (`output: "export"`) at `/`. The app runs on `http://localhost:8000`.
 - **Docker build.** Multi-stage `Dockerfile` at the repo root: a Node (current LTS) stage runs `npm ci && npm run build` to produce `frontend/out/`; a Python (latest stable, slim) stage installs `backend/requirements.txt` with pip and copies the backend code plus the exported frontend.
-- **Backend tests.** `pytest` runs inside the image: `docker run --rm my-trello pytest`. `pytest` and `httpx` (needed by FastAPI's `TestClient`) are listed in the same `requirements.txt`.
+- **Backend tests.** `pytest` runs inside the image: `docker run --rm my-trello pytest`. `pytest` and `httpx2` (needed by FastAPI's `TestClient`) are listed in the same `requirements.txt`.
 - **Frontend tests.** Unit tests (Vitest) run locally with mocked `fetch`. From Part 3 on, Playwright e2e tests run against the running container at `http://localhost:8000` (same origin for UI and API, no CORS or proxy setup needed).
 - **Scripts.** `scripts/start.sh` / `scripts/stop.sh` for Mac and Linux, `scripts/start.ps1` / `scripts/stop.ps1` for Windows. Start builds the image and runs the container in the background; stop stops and removes it.
 - **Database location.** SQLite file at `/app/data/my-trello.db` inside the container, on a named Docker volume so data survives restarts. Created on startup if missing.
@@ -23,11 +23,11 @@ Success criteria: user approval.
 
 ## Part 2: Scaffolding
 
-- [ ] `backend/app/main.py`: FastAPI app with `GET /api/health` returning `{"status": "ok"}` and a static `index.html` "hello world" page served at `/`
-- [ ] `backend/requirements.txt` with pinned versions (fastapi, uvicorn, pytest, httpx)
-- [ ] `Dockerfile` (Python stage only for now) and `.dockerignore`
-- [ ] `scripts/start.sh`, `scripts/stop.sh`, `scripts/start.ps1`, `scripts/stop.ps1`
-- [ ] Update `backend/AGENTS.md` and `scripts/AGENTS.md`
+- [x] `backend/app/main.py`: FastAPI app with `GET /api/health` returning `{"status": "ok"}` and a static `index.html` "hello world" page served at `/`
+- [x] `backend/requirements.txt` with pinned versions (fastapi, uvicorn, pytest, httpx2)
+- [x] `Dockerfile` (Python stage only for now) and `.dockerignore`
+- [x] `scripts/start.sh`, `scripts/stop.sh`, `scripts/start.ps1`, `scripts/stop.ps1`
+- [x] Update `backend/AGENTS.md` and `scripts/AGENTS.md`
 
 Tests:
 - Backend: `/api/health` returns 200 and `{"status": "ok"}`; `/` returns the hello world HTML.
