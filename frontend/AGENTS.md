@@ -2,7 +2,7 @@
 
 Next.js 16 (App Router), React 19, TypeScript, Tailwind v4, `@dnd-kit` for drag and drop. `@/` aliases `src/`.
 
-Currently a pure frontend demo: the board lives in React state only, with no backend, persistence or sign in.
+Built as a static export (`output: "export"` in `next.config.ts`) into `out/`, which the Docker image copies into the backend and serves at `/`. The board still lives in React state only, with no persistence or sign in yet.
 
 ## Structure
 
@@ -14,26 +14,27 @@ Currently a pure frontend demo: the board lives in React state only, with no bac
   - `initialData`: demo board with 5 fixed columns (Backlog, Discovery, In Progress, Review, Done) and 8 cards.
   - `moveCard(columns, activeId, overId)`: reorders within a column or moves across columns. Dropping onto a column id appends; onto a card id inserts at that position.
   - `createId(prefix)`: random id for new cards.
-- `src/components/KanbanBoard.tsx`: client component that owns all board state (`useState` seeded from `initialData`) and the `DndContext`. Handlers: rename column, add card, delete card, drag start/end.
+- `src/components/KanbanBoard.tsx`: client component that owns all board state (`useState` seeded from `initialData`) and the `DndContext`. Handlers: rename column, add card, edit card, delete card, drag start/end.
 - `src/components/KanbanColumn.tsx`: droppable column with an inline title input (rename), a `SortableContext` of cards and `NewCardForm`.
-- `src/components/KanbanCard.tsx`: sortable card showing title, details and a "Remove" button.
+- `src/components/KanbanCard.tsx`: sortable card showing title, details, "Edit" and "Remove" buttons. "Edit" swaps the content for an inline form (title required, details optional, Save / Cancel). While editing, the drag attributes and listeners are not applied, so the form is not nested in the drag handle (`role="button"`, `aria-disabled`).
 - `src/components/KanbanCardPreview.tsx`: card shown in the `DragOverlay` while dragging.
 - `src/components/NewCardForm.tsx`: toggleable form to add a card (title required, details optional).
 
-Columns are fixed: they can be renamed but not added or removed. Cards cannot be edited yet (planned in Part 3 of `docs/PLAN.md`).
+Columns are fixed: they can be renamed but not added or removed.
 
 ## Tests
 
-- Unit (Vitest + Testing Library, jsdom): `src/**/*.test.ts(x)`. `src/lib/kanban.test.ts` covers `moveCard`; `src/components/KanbanBoard.test.tsx` covers rendering, column rename, add and remove card. Setup in `src/test/setup.ts`.
-- E2E (Playwright, Chromium): `tests/`. `playwright.config.ts` starts the dev server on `127.0.0.1:3000`. `tests/kanban.spec.ts` covers load, add card and drag between columns.
+- Unit (Vitest + Testing Library, jsdom): `src/**/*.test.ts(x)`, config in `vitest.config.mts`. `src/lib/kanban.test.ts` covers `moveCard`; `src/components/KanbanBoard.test.tsx` covers rendering, column rename, add, edit and remove card. Setup in `src/test/setup.ts` (jest-dom matchers via `@testing-library/jest-dom/vitest`). Vitest globals are typed through `"types"` in `tsconfig.json`.
+- E2E (Playwright, Chromium): `tests/`. Runs against the running container at `http://localhost:8000` (start it with `scripts/start.*` first; override with `BASE_URL`). `tests/kanban.spec.ts` covers load, add, edit and remove card, rename column and drag between columns.
 
 ## Commands
 
 ```bash
 npm install
+npx playwright install chromium   # once, for e2e
 npm run dev
 npm run build
 npm run lint
 npm run test:unit
-npm run test:e2e
+npm run test:e2e   # container must be running
 ```

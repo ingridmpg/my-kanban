@@ -16,6 +16,31 @@ test("adds a card to a column", async ({ page }) => {
   await expect(firstColumn.getByText("Playwright card")).toBeVisible();
 });
 
+test("edits a card", async ({ page }) => {
+  await page.goto("/");
+  const card = page.getByTestId("card-card-1");
+  await card.getByRole("button", { name: /^edit/i }).click();
+  await card.getByLabel("Card title").fill("Edited card");
+  await card.getByLabel("Card details").fill("Edited via e2e.");
+  await card.getByRole("button", { name: "Save" }).click();
+  await expect(card.getByText("Edited card")).toBeVisible();
+  await expect(card.getByText("Edited via e2e.")).toBeVisible();
+});
+
+test("removes a card", async ({ page }) => {
+  await page.goto("/");
+  const card = page.getByTestId("card-card-1");
+  await card.getByRole("button", { name: /^delete/i }).click();
+  await expect(card).toHaveCount(0);
+});
+
+test("renames a column", async ({ page }) => {
+  await page.goto("/");
+  const title = page.getByTestId("column-col-backlog").getByLabel("Column title");
+  await title.fill("Ideas");
+  await expect(title).toHaveValue("Ideas");
+});
+
 test("moves a card between columns", async ({ page }) => {
   await page.goto("/");
   const card = page.getByTestId("card-card-1");

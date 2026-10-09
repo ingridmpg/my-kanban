@@ -44,6 +44,7 @@ A working MVP of the frontend has been built and is already in frontend. This is
 2. Keep it simple - NEVER over-engineer, ALWAYS simplify, NO unnecessary defensive programming. No extra features - focus on simplicity.
 3. Be concise. Keep README minimal. IMPORTANT: no emojis ever
 4. When hitting issues, always identify root cause before trying a fix. Do not guess. Prove with evidence, then fix the root cause.
+5. Never commit or push automatically. Only run `git commit` or `git push` when the user explicitly asks for it, and each request covers only that one commit or push.
 
 ## Working documentation
 

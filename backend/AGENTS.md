@@ -5,7 +5,7 @@ Python FastAPI app. Runs only inside the Docker container (see the root `Dockerf
 ## Structure
 
 - `app/main.py`: FastAPI app. API routes live under `/api` (currently `GET /api/health`). The `static/` directory is mounted at `/` last, so it never shadows `/api` routes.
-- `static/`: files served at `/`. For now a hello world `index.html` that calls `/api/health`; replaced by the exported Next.js build in Part 3.
+- `static/`: served at `/`. Not in the repo: the `Dockerfile` copies the exported Next.js build (`frontend/out/`) here.
 - `tests/`: pytest tests using FastAPI's `TestClient`. `pytest.ini` puts the backend root on the Python path.
 - `requirements.txt`: all dependencies, including test ones, with pinned versions.
 

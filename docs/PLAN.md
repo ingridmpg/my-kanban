@@ -36,13 +36,13 @@ Success criteria: on Windows, `scripts/start.ps1` builds and starts the containe
 
 ## Part 3: Add in Frontend
 
-- [ ] Update frontend dependencies to their latest versions and resolve `npm audit` findings (`npm ci` on 2026-10-08 reported 27 vulnerabilities: 1 low, 4 moderate, 18 high, 4 critical)
-- [ ] Set `output: "export"` in `frontend/next.config.ts`
-- [ ] Add the Node build stage to the `Dockerfile` and serve `frontend/out/` at `/` from FastAPI (replacing the hello world page)
-- [ ] Add card editing: an "Edit" action on each card opens an inline form with title and details, with Save and Cancel; title is required
-- [ ] Install the Playwright Chromium browser locally (`npx playwright install chromium`; not installed as of 2026-10-08)
-- [ ] Make the Playwright base URL configurable so e2e tests run against the container (`http://localhost:8000`)
-- [ ] Update `frontend/AGENTS.md`
+- [x] Update frontend dependencies to their latest versions and resolve `npm audit` findings (`npm ci` on 2026-10-08 reported 27 vulnerabilities: 1 low, 4 moderate, 18 high, 4 critical). As of 2026-10-09, `npm audit --omit=dev` is clean; 5 high remain in dev-only lint tooling (`eslint-config-next` -> `fast-glob` -> `micromatch` -> `braces@3.0.3`, the latest `braces` release, so no fix exists yet); the user accepted this exception on 2026-10-09. ESLint stays on 9.x and TypeScript on 6.0.x because the plugins in `eslint-config-next` and `typescript-eslint` do not support ESLint 10 or TypeScript 7 yet.
+- [x] Set `output: "export"` in `frontend/next.config.ts`
+- [x] Add the Node build stage to the `Dockerfile` and serve `frontend/out/` at `/` from FastAPI (replacing the hello world page)
+- [x] Add card editing: an "Edit" action on each card opens an inline form with title and details, with Save and Cancel; title is required
+- [x] Install the Playwright Chromium browser locally (`npx playwright install chromium`; not installed as of 2026-10-08)
+- [x] Make the Playwright base URL configurable so e2e tests run against the container (`http://localhost:8000`)
+- [x] Update `frontend/AGENTS.md`
 
 Tests:
 - Unit: edit a card (title and details change); cancel leaves the card unchanged; empty title is not saved. Existing tests keep passing after the dependency update.

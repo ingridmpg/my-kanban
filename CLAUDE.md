@@ -47,10 +47,11 @@ A Project Management MVP web app:
 2. Keep it simple: never over-engineer, always simplify, no unnecessary defensive programming, no extra features.
 3. Be concise. Keep the README minimal. No emojis, ever.
 4. When hitting issues, identify the root cause before trying a fix. Do not guess: prove it with evidence, then fix the root cause.
+5. Never commit or push automatically. Only run `git commit` or `git push` when the user explicitly asks for it, and each request covers only that one commit or push.
 
 ## Current state
 
-Parts 1-2 are done. The Docker container runs a FastAPI scaffold (`/api/health` and a hello world page at `/`), started and stopped with the scripts in `scripts/`; backend tests run with `docker run --rm my-trello pytest`. The frontend is still a standalone demo, not yet served by the container. Sign in, SQLite and persistence are still to be built per `docs/PLAN.md`.
+Parts 1-3 are done. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000` (plus `/api/health`), started and stopped with the scripts in `scripts/`; backend tests run with `docker run --rm my-trello pytest`. The board is fully usable (including card editing) but lives in React state only. Sign in, SQLite and persistence are still to be built per `docs/PLAN.md`.
 
 ## Frontend commands
 
@@ -64,13 +65,13 @@ npm run lint                # eslint
 npm run test:unit           # vitest (src/**/*.test.ts(x), jsdom)
 npx vitest run src/lib/kanban.test.ts   # single unit test file
 npx vitest run -t "test name"           # single test by name
-npm run test:e2e            # playwright (tests/), auto-starts dev server on 127.0.0.1:3000
+npm run test:e2e            # playwright (tests/), against the running container on localhost:8000
 npx playwright test tests/kanban.spec.ts -g "test name"
 ```
 
 ## Frontend architecture
 
-- Next.js 16 App Router, React 19, Tailwind v4, `@dnd-kit` for drag and drop. `@/` aliases `src/`.
+- Next.js 16 App Router with static export (`output: "export"`), React 19, Tailwind v4, `@dnd-kit` for drag and drop. `@/` aliases `src/`.
 - `src/lib/kanban.ts` defines the data model and pure logic: `BoardData` is `{ columns: Column[], cards: Record<id, Card> }`, where each column holds an ordered `cardIds` list (cards are normalized, not nested). `moveCard` handles reordering within a column and moving across columns (dropping onto a column id appends; onto a card id inserts at that position). This shape is the natural basis for the backend schema.
-- `src/components/KanbanBoard.tsx` owns all board state (`useState` seeded from `initialData`, no persistence yet) and passes handlers (rename column, add/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Wiring to the backend API in Part 7 replaces this local state source.
+- `src/components/KanbanBoard.tsx` owns all board state (`useState` seeded from `initialData`, no persistence yet) and passes handlers (rename column, add/edit/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Wiring to the backend API in Part 7 replaces this local state source.
 - Columns are fixed (renamable, not addable/removable).
