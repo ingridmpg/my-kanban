@@ -25,7 +25,14 @@ CREATE TABLE IF NOT EXISTS boards (
 );
 """
 
-DEFAULT_BOARD = (Path(__file__).parent / "default_board.json").read_text()
+DEMO_BOARD = (Path(__file__).parent / "demo_board.json").read_text()
+# New accounts start with the same fixed columns and no cards.
+EMPTY_BOARD = json.dumps(
+    {
+        "columns": [{**column, "cardIds": []} for column in json.loads(DEMO_BOARD)["columns"]],
+        "cards": {},
+    }
+)
 DEMO_USERNAME = "user"
 DEMO_PASSWORD = "password"
 
@@ -44,7 +51,7 @@ def init(path: Path) -> None:
     with closing(connect(path)) as conn:
         conn.executescript(SCHEMA)
         if find_user(conn, DEMO_USERNAME) is None:
-            create_user(conn, DEMO_USERNAME, hash_password(DEMO_PASSWORD))
+            create_user(conn, DEMO_USERNAME, hash_password(DEMO_PASSWORD), DEMO_BOARD)
 
 
 def get_db(request: Request) -> Iterator[sqlite3.Connection]:
@@ -55,15 +62,15 @@ def get_db(request: Request) -> Iterator[sqlite3.Connection]:
 Db = Annotated[sqlite3.Connection, Depends(get_db)]
 
 
-def create_user(conn: sqlite3.Connection, username: str, password_hash: str) -> int:
-    """Create a user with the default board. Raises sqlite3.IntegrityError if taken."""
+def create_user(conn: sqlite3.Connection, username: str, password_hash: str, board: str) -> int:
+    """Create a user with the given board JSON. Raises sqlite3.IntegrityError if taken."""
     with conn:
         user_id = conn.execute(
             "INSERT INTO users (username, password_hash) VALUES (?, ?)",
             (username, password_hash),
         ).lastrowid
         conn.execute(
-            "INSERT INTO boards (user_id, data) VALUES (?, ?)", (user_id, DEFAULT_BOARD)
+            "INSERT INTO boards (user_id, data) VALUES (?, ?)", (user_id, board)
         )
     return user_id
 

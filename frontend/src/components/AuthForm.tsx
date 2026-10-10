@@ -6,7 +6,7 @@ type AuthFormProps = {
 };
 
 const inputClassName =
-  "mt-2 w-full rounded-xl border border-[var(--stroke)] bg-white px-3 py-2 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]";
+  "mt-2 w-full rounded-xl border border-[var(--stroke)] bg-white px-3 py-2 text-sm font-medium text-[var(--heading)] outline-none transition focus:border-[var(--primary)]";
 
 export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
   const [isSignIn, setIsSignIn] = useState(true);
@@ -37,16 +37,36 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
       <section className="w-full max-w-sm rounded-[32px] border border-[var(--stroke)] bg-white/80 p-8 shadow-[var(--shadow)]">
-        <div className="h-2 w-10 rounded-full bg-[var(--accent-yellow)]" />
-        <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--navy-dark)]">
+        <div className="h-2 w-10 rounded-full bg-[var(--accent)]" />
+        <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--heading)]">
           My Kanban
         </h1>
-        <p className="mt-2 text-sm text-[var(--gray-text)]">
+        <p className="mt-2 text-sm text-[var(--muted)]">
           {isSignIn ? "Sign in to see your board." : "Create an account to get your own board."}
         </p>
 
+        {isSignIn && (
+          <div className="mt-6 rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] px-4 py-3 text-center text-sm text-[var(--muted)]">
+            Just looking? Try the demo account{" "}
+            <span className="whitespace-nowrap font-semibold text-[var(--heading)]">
+              user / password
+            </span>
+            .
+            <button
+              type="button"
+              onClick={() => {
+                setUsername("user");
+                setPassword("password");
+              }}
+              className="mx-auto mt-2 block rounded-full border border-[var(--primary)] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--primary)] transition hover:border-[var(--candy-5)] hover:bg-[var(--candy-5)] hover:text-[var(--heading)]"
+            >
+              Use demo account
+            </button>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gray-text)]">
+          <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
             Username
             <input
               value={username}
@@ -56,7 +76,7 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
               required
             />
           </label>
-          <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gray-text)]">
+          <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
             Password
             <input
               type="password"
@@ -68,13 +88,13 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
             />
           </label>
           {error && (
-            <p role="alert" className="text-sm font-medium text-red-600">
+            <p role="alert" className="text-sm font-medium text-[var(--danger)]">
               {error}
             </p>
           )}
           <button
             type="submit"
-            className="w-full rounded-full bg-[var(--secondary-purple)] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110"
+            className="w-full rounded-full bg-[var(--secondary)] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110"
           >
             {isSignIn ? "Sign in" : "Create account"}
           </button>
@@ -83,7 +103,7 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
         <button
           type="button"
           onClick={toggleMode}
-          className="mt-4 w-full text-sm font-semibold text-[var(--primary-blue)]"
+          className="mt-4 w-full text-sm font-semibold text-[var(--primary)]"
         >
           {isSignIn ? "New here? Create an account" : "Already have an account? Sign in"}
         </button>

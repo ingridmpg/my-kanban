@@ -58,8 +58,9 @@ describe("KanbanBoard", () => {
     expect(within(column).getByText("New card")).toBeInTheDocument();
     await waitFor(() => expect(saves()).toHaveLength(1));
     const saved = saves()[0];
-    const newId = saved.columns[0].cardIds[2];
+    const newId = saved.columns[0].cardIds[0]; // new cards go on top, where the form is
     expect(saved.cards[newId]).toEqual({ id: newId, title: "New card", details: "Notes" });
+    expect(saved.columns[0].cardIds.slice(1)).toEqual(["card-1", "card-2"]);
   });
 
   it("removes a card and saves it", async () => {

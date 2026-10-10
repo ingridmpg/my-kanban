@@ -11,7 +11,7 @@ Python FastAPI app. Runs only inside the Docker container (see the root `Dockerf
 - `app/auth.py`: scrypt password hashing (`hash_password`, `verify_password`), in-memory sessions (`start_session`, `end_session`) and the `CurrentUserId` dependency.
 - `app/database.py`: SQLite access with `sqlite3` (no ORM). `init` creates the tables and seeds the demo account `user` / `password` once; `get_db` / `Db` gives each request its own connection. Schema and design in `docs/DATABASE.md`.
 - `app/models.py`: Pydantic models. `Board` / `Column` / `Card` mirror `BoardData` in `frontend/src/lib/kanban.ts` (`cardIds` via alias). `check_board_update` enforces fixed columns and that every card is in exactly one column.
-- `app/default_board.json`: starting board for the demo account and every new sign up.
+- `app/demo_board.json`: the demo account's board (5 columns, 8 sample cards). New sign ups get `EMPTY_BOARD` from `app/database.py`: the same columns with no cards.
 - `static/`: served at `/`. Not in the repo: the `Dockerfile` copies the exported Next.js build (`frontend/out/`) here.
 - `tests/`: pytest tests using FastAPI's `TestClient`. The `client` fixture in `conftest.py` points `DATABASE_PATH` at a temporary file and enters the app lifespan, so each test gets a fresh database. `pytest.ini` puts the backend root on the Python path. Password hashing takes ~0.7 s, so the suite takes ~20 s.
 - `requirements.txt`: all dependencies, including test ones, with pinned versions.

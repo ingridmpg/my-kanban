@@ -103,3 +103,24 @@ Tests:
 Note: the container restart is not part of the e2e suite (Playwright cannot restart the container); it is covered by `test_data_survives_a_restart` in the backend and was checked by hand against the real container in Part 5. Drag and drop is covered by e2e only (the pointer sensor does not run in jsdom).
 
 Success criteria: the app at `http://localhost:8000` supports sign up and sign in with a persistent board per user; all unit, e2e and backend tests pass.
+
+## Part 7: Adjustments
+
+- [x] New accounts start with an empty board (the 5 columns, no cards); the demo account keeps the sample cards (`backend/app/demo_board.json`). This replaces "new users get the default board" in Parts 5 and 6.
+- [x] Cards use a single column: title and details full width, actions below
+- [x] Edit and delete buttons replaced by icons (inline SVG, keeping their accessible labels)
+- [x] Candy color palette (see the color scheme in `AGENTS.md`), with CSS variables renamed by role; one pastel per column
+- [x] Sign in screen shows the demo account (`user` / `password`) with a "Use demo account" button, so visitors can try the app without signing up. Trade-off: the demo board is shared by every visitor.
+- [x] Fix: a card dropped into an empty column landed in the neighbouring column when columns were tall (`closestCorners` measured distance to the far-away corners of the tall column). Drops now use what is under the pointer (`pointerWithin`), with `closestCorners` as fallback.
+- [x] Fix: the target column is highlighted while dragging, also when the pointer is over one of its cards (it was only highlighted over its empty space)
+- [x] "Add a card" is a "+" icon at the top of each column; the form opens there and new cards are added at the top of the column
+- [x] "One board. Five columns. Zero clutter." in plum (`--heading`) instead of blueberry, which read as a link
+- [x] Grab cursor on cards (grabbing while dragging) and pointer cursor on every button
+- [x] Update `AGENTS.md`, `CLAUDE.md`, `frontend/AGENTS.md`, `backend/AGENTS.md` and `docs/DATABASE.md`
+
+Tests:
+- Backend: the demo account gets the demo board; a new account gets the empty board.
+- E2E: dropping into an empty column works and highlights it while the columns are tall (fails on the old collision detection); a new account starts with no cards; edit, delete, move and persistence tests add their own cards first; the demo account signs in from the hint and shows its sample cards.
+- Unit: the demo hint fills in the fields and only shows when signing in; existing tests keep passing (the icon buttons keep the "Edit <title>" / "Delete <title>" labels).
+
+Success criteria: all unit, e2e and backend tests pass; the new look checked with screenshots of the sign in screen, the board, a card and the edit form.

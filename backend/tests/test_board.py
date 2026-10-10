@@ -3,9 +3,11 @@ from pathlib import Path
 
 import pytest
 
-DEFAULT_BOARD = json.loads(
-    (Path(__file__).parent.parent / "app" / "default_board.json").read_text()
-)
+DEMO_BOARD = json.loads((Path(__file__).parent.parent / "app" / "demo_board.json").read_text())
+EMPTY_BOARD = {
+    "columns": [{**column, "cardIds": []} for column in DEMO_BOARD["columns"]],
+    "cards": {},
+}
 
 
 @pytest.fixture
@@ -16,12 +18,18 @@ def signed_in(client):
 
 def test_board_routes_require_session(client):
     assert client.get("/api/board").status_code == 401
-    assert client.put("/api/board", json=DEFAULT_BOARD).status_code == 401
+    assert client.put("/api/board", json=DEMO_BOARD).status_code == 401
 
 
-def test_new_user_gets_default_board(client):
+def test_demo_user_gets_demo_board(signed_in):
+    assert signed_in.get("/api/board").json() == DEMO_BOARD
+
+
+def test_new_user_gets_empty_board(client):
     client.post("/api/register", json={"username": "ingrid", "password": "secret-pass"})
-    assert client.get("/api/board").json() == DEFAULT_BOARD
+    board = client.get("/api/board").json()
+    assert board == EMPTY_BOARD
+    assert len(board["columns"]) == 5
 
 
 def test_put_then_get_returns_updated_board(signed_in):
@@ -72,7 +80,7 @@ def test_put_rejects_inconsistent_cards(signed_in):
     board["cards"]["card-1"]["id"] = "card-other"
     assert signed_in.put("/api/board", json=board).status_code == 422
 
-    assert signed_in.get("/api/board").json() == DEFAULT_BOARD
+    assert signed_in.get("/api/board").json() == DEMO_BOARD
 
 
 def test_boards_of_different_users_are_independent(signed_in):
@@ -82,7 +90,7 @@ def test_boards_of_different_users_are_independent(signed_in):
     signed_in.post("/api/logout")
 
     signed_in.post("/api/register", json={"username": "ingrid", "password": "secret-pass"})
-    assert signed_in.get("/api/board").json() == DEFAULT_BOARD
+    assert signed_in.get("/api/board").json() == EMPTY_BOARD
     other = signed_in.get("/api/board").json()
     other["columns"][0]["title"] = "Ingrid column"
     signed_in.put("/api/board", json=other)

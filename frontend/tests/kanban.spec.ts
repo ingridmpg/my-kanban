@@ -39,6 +39,19 @@ const boardSaved = (page: Page) =>
     (response) => response.url().endsWith("/api/board") && response.request().method() === "PUT"
   );
 
+const cards = (page: Page) => page.locator('[data-testid^="card-"]');
+
+// New accounts start empty: adds a card to a column (the first by default) and waits for the save.
+const addCard = async (page: Page, title: string, columnIndex = 0) => {
+  const column = columns(page).nth(columnIndex);
+  await column.getByRole("button", { name: /add a card/i }).click();
+  await column.getByPlaceholder("Card title").fill(title);
+  const saved = boardSaved(page);
+  await column.getByRole("button", { name: /add card/i }).click();
+  await saved;
+  return cards(page).filter({ hasText: title });
+};
+
 const reloadBoard = async (page: Page) => {
   await page.reload();
   await expect(columns(page)).toHaveCount(5);
@@ -57,16 +70,19 @@ test("shows an error on a wrong password", async ({ page }) => {
   await expect(page.getByText("Invalid username or password")).toBeVisible();
 });
 
-test("the demo account signs in and out", async ({ page }) => {
+test("the demo account signs in from the hint and out", async ({ page }) => {
   await page.goto("/");
-  await signIn(page, "user", "password");
+  await page.getByRole("button", { name: "Use demo account" }).click();
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(columns(page)).toHaveCount(5);
   await expect(page.getByText("Signed in as")).toContainText("user");
+  await expect(page.getByTestId("card-card-1")).toBeVisible();
   await logOut(page);
 });
 
-test("a new account gets the default board and stays signed in on reload", async ({ page }) => {
+test("a new account starts with an empty board and stays signed in on reload", async ({ page }) => {
   const username = await signUp(page);
-  await expect(page.getByTestId("card-card-1")).toBeVisible();
+  await expect(cards(page)).toHaveCount(0);
   await reloadBoard(page);
   await expect(page.getByText("Signed in as")).toContainText(username);
 });
@@ -87,7 +103,8 @@ test("adding a card survives a reload", async ({ page }) => {
 
 test("editing a card survives a reload", async ({ page }) => {
   await signUp(page);
-  const card = page.getByTestId("card-card-1");
+  await addCard(page, "Original card");
+  const card = cards(page).first();
   await card.getByRole("button", { name: /^edit/i }).click();
   await card.getByLabel("Card title").fill("Edited card");
   await card.getByLabel("Card details").fill("Edited via e2e.");
@@ -102,12 +119,13 @@ test("editing a card survives a reload", async ({ page }) => {
 
 test("removing a card survives a reload", async ({ page }) => {
   await signUp(page);
+  const card = await addCard(page, "Doomed card");
   const saved = boardSaved(page);
-  await page.getByTestId("card-card-1").getByRole("button", { name: /^delete/i }).click();
+  await card.getByRole("button", { name: /^delete/i }).click();
   await saved;
 
   await reloadBoard(page);
-  await expect(page.getByTestId("card-card-1")).toHaveCount(0);
+  await expect(cards(page)).toHaveCount(0);
 });
 
 test("renaming a column survives a reload", async ({ page }) => {
@@ -124,7 +142,7 @@ test("renaming a column survives a reload", async ({ page }) => {
 
 test("moving a card between columns survives a reload", async ({ page }) => {
   await signUp(page);
-  const card = page.getByTestId("card-card-1");
+  const card = await addCard(page, "Moving card");
   const targetColumn = page.getByTestId("column-col-review");
   const cardBox = await card.boundingBox();
   const columnBox = await targetColumn.boundingBox();
@@ -140,28 +158,57 @@ test("moving a card between columns survives a reload", async ({ page }) => {
   await saved;
 
   await reloadBoard(page);
-  await expect(targetColumn.getByTestId("card-card-1")).toBeVisible();
+  await expect(targetColumn.getByText("Moving card")).toBeVisible();
 });
 
 test("changes survive logging out and back in", async ({ page }) => {
   const username = await signUp(page);
-  const saved = boardSaved(page);
-  await page.getByTestId("card-card-1").getByRole("button", { name: /^delete/i }).click();
-  await saved;
+  await addCard(page, "Kept card");
 
   await logOut(page);
   await signIn(page, username);
-  await expect(page.getByTestId("card-card-1")).toHaveCount(0);
+  await expect(cards(page).filter({ hasText: "Kept card" })).toBeVisible();
 });
 
 test("boards of different users are independent", async ({ page }) => {
   await signUp(page);
-  const saved = boardSaved(page);
-  await page.getByTestId("card-card-1").getByRole("button", { name: /^delete/i }).click();
-  await saved;
+  await addCard(page, "Private card");
   await logOut(page);
 
   await page.getByRole("button", { name: /new here/i }).click();
   await submitCredentials(page, uniqueUsername(), PASSWORD);
-  await expect(page.getByTestId("card-card-1")).toBeVisible();
+  await expect(columns(page)).toHaveCount(5);
+  await expect(cards(page)).toHaveCount(0);
+});
+
+test("drops into an empty column and highlights it, even when columns are tall", async ({ page }) => {
+  await signUp(page);
+  // Many cards in Backlog make every column tall; Done gets one card, Review stays empty.
+  for (let n = 1; n <= 8; n++) {
+    await addCard(page, `Tall ${n}`);
+  }
+  await addCard(page, "Done card", 4);
+
+  // New cards go on top, so "Tall 8" is the first card; the drag must start on screen.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const card = cards(page).filter({ hasText: "Tall 8" });
+  const review = page.getByTestId("column-col-review");
+  const cardBox = await card.boundingBox();
+  const reviewBox = await review.boundingBox();
+  if (!cardBox || !reviewBox) {
+    throw new Error("Unable to resolve drag coordinates.");
+  }
+
+  const saved = boardSaved(page);
+  await page.mouse.move(cardBox.x + cardBox.width / 2, cardBox.y + cardBox.height / 2);
+  await page.mouse.down();
+  // Near the top of the empty column, where the neighbouring card used to win.
+  await page.mouse.move(reviewBox.x + reviewBox.width / 2, reviewBox.y + 150, { steps: 15 });
+  await expect(review).toHaveClass(/ring-2/);
+  await expect(page.getByTestId("column-col-done")).not.toHaveClass(/ring-2/);
+  await page.mouse.up();
+  await saved;
+
+  await expect(review.getByText("Tall 8")).toBeVisible();
+  await expect(review).not.toHaveClass(/ring-2/);
 });

@@ -5,18 +5,14 @@ type KanbanCardPreviewProps = {
 };
 
 export const KanbanCardPreview = ({ card }: KanbanCardPreviewProps) => (
-  <article className="rounded-2xl border border-transparent bg-white px-4 py-4 shadow-[0_18px_32px_rgba(3,33,71,0.16)]">
-    <div className="flex items-start justify-between gap-3">
-      <div>
-        <h4 className="font-display text-base font-semibold text-[var(--navy-dark)]">
-          {card.title}
-        </h4>
-        {card.details && (
-          <p className="mt-2 text-sm leading-6 text-[var(--gray-text)]">
-            {card.details}
-          </p>
-        )}
-      </div>
-    </div>
+  <article className="rounded-2xl border border-transparent bg-white px-4 py-4 shadow-[0_18px_32px_rgba(46,26,71,0.16)]">
+    <h4 className="break-words font-display text-base font-semibold text-[var(--heading)]">
+      {card.title}
+    </h4>
+    {card.details && (
+      <p className="mt-2 break-words text-sm leading-6 text-[var(--muted)]">
+        {card.details}
+      </p>
+    )}
   </article>
 );

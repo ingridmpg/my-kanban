@@ -1,27 +1,43 @@
 @import "tailwindcss";
 
+/* Candy palette. Text colors meet WCAG AA (4.5:1) on white. */
 :root {
-  --accent-yellow: #ecad0a;
-  --primary-blue: #209dd7;
-  --secondary-purple: #753991;
-  --navy-dark: #032147;
-  --gray-text: #888888;
-  --surface: #f7f8fb;
+  --accent: #ff8fab; /* bubblegum: accent lines, highlights */
+  --primary: #4353e8; /* blueberry: links, key sections */
+  --secondary: #8048d8; /* grape: submit buttons, important actions */
+  --heading: #2e1a47; /* plum ink: main headings */
+  --muted: #7a6d88; /* mauve: supporting text, labels */
+  --danger: #e0245e; /* cherry: errors */
+  --surface: #fff7fb;
   --surface-strong: #ffffff;
-  --stroke: rgba(3, 33, 71, 0.08);
-  --shadow: 0 18px 40px rgba(3, 33, 71, 0.12);
+  --stroke: rgba(46, 26, 71, 0.08);
+  --shadow: 0 18px 40px rgba(46, 26, 71, 0.1);
+
+  /* One pastel per column, in order. */
+  --candy-1: #ffafcc; /* pink */
+  --candy-2: #ffc8a2; /* peach */
+  --candy-3: #ffe17a; /* lemon */
+  --candy-4: #9be7c4; /* mint */
+  --candy-5: #a2d2ff; /* sky */
 }
 
 @theme inline {
   --color-background: var(--surface);
-  --color-foreground: var(--navy-dark);
+  --color-foreground: var(--heading);
   --font-sans: var(--font-body);
 }
 
 body {
   background: var(--surface);
-  color: var(--navy-dark);
+  color: var(--heading);
   font-family: var(--font-body), "Segoe UI", sans-serif;
+}
+
+/* Tailwind v4 gives buttons the default cursor; restore the pointer. */
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 .font-display {

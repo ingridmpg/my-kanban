@@ -32,11 +32,16 @@ A working MVP of the frontend has been built and is already in frontend. This is
 
 ## Color Scheme
 
-- Accent Yellow: `#ecad0a` - accent lines, highlights
-- Blue Primary: `#209dd7` - links, key sections
-- Purple Secondary: `#753991` - submit buttons, important actions
-- Dark Navy: `#032147` - main headings
-- Gray Text: `#888888` - supporting text, labels
+Candy, but elegant:
+
+- Bubblegum Accent: `#ff8fab` - accent lines, highlights
+- Blueberry Primary: `#4353e8` - links, key sections
+- Grape Secondary: `#8048d8` - submit buttons, important actions
+- Plum Heading: `#2e1a47` - main headings
+- Mauve Text: `#7a6d88` - supporting text, labels
+- Cherry Danger: `#e0245e` - error messages
+- Candy column pastels, one per column in order: pink `#ffafcc`, peach `#ffc8a2`, lemon `#ffe17a`, mint `#9be7c4`, sky `#a2d2ff`
+- Background `#fff7fb`. Text colors meet WCAG AA contrast (4.5:1) on white; pastels are decorative only.
 
 ## Coding standards
 

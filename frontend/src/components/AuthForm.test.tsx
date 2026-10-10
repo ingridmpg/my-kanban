@@ -28,6 +28,16 @@ describe("AuthForm", () => {
     ]);
   });
 
+  it("fills in the demo account, only when signing in", async () => {
+    render(<AuthForm onSignedIn={vi.fn()} />);
+    await userEvent.click(screen.getByRole("button", { name: "Use demo account" }));
+    expect(screen.getByLabelText("Username")).toHaveValue("user");
+    expect(screen.getByLabelText("Password")).toHaveValue("password");
+
+    await switchToCreateAccount();
+    expect(screen.queryByRole("button", { name: "Use demo account" })).not.toBeInTheDocument();
+  });
+
   it("shows the error on bad credentials", async () => {
     mockApi({
       "POST /api/login": () => ({

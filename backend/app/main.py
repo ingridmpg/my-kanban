@@ -35,7 +35,7 @@ def health() -> dict[str, str]:
 def register(account: NewAccount, response: Response, db: Db, sessions: Sessions) -> User:
     try:
         user_id = database.create_user(
-            db, account.username, auth.hash_password(account.password)
+            db, account.username, auth.hash_password(account.password), database.EMPTY_BOARD
         )
     except sqlite3.IntegrityError:
         raise HTTPException(status.HTTP_409_CONFLICT, "Username already taken")

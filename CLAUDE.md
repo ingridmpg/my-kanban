@@ -35,11 +35,14 @@ A Project Management MVP web app:
 
 ## Color scheme
 
-- Accent Yellow `#ecad0a`: accent lines, highlights
-- Blue Primary `#209dd7`: links, key sections
-- Purple Secondary `#753991`: submit buttons, important actions
-- Dark Navy `#032147`: main headings
-- Gray Text `#888888`: supporting text, labels
+- Bubblegum Accent `#ff8fab`: accent lines, highlights
+- Blueberry Primary `#4353e8`: links, key sections
+- Grape Secondary `#8048d8`: submit buttons, important actions
+- Plum Heading `#2e1a47`: main headings
+- Mauve Text `#7a6d88`: supporting text, labels
+- Cherry Danger `#e0245e`: error messages
+- Candy column pastels, one per column in order: pink `#ffafcc`, peach `#ffc8a2`, lemon `#ffe17a`, mint `#9be7c4`, sky `#a2d2ff`
+- Background `#fff7fb`. Text colors meet WCAG AA contrast (4.5:1) on white; pastels are decorative only.
 
 ## Coding standards
 
@@ -74,5 +77,5 @@ npx playwright test tests/kanban.spec.ts -g "test name"
 - Next.js 16 App Router with static export (`output: "export"`), React 19, Tailwind v4, `@dnd-kit` for drag and drop. `@/` aliases `src/`.
 - `src/lib/kanban.ts` defines the data model (mirrored by Pydantic models in `backend/app/models.py`) and pure logic: `BoardData` is `{ columns: Column[], cards: Record<id, Card> }`, where each column holds an ordered `cardIds` list (cards are normalized, not nested). `moveCard` handles reordering within a column and moving across columns (dropping onto a column id appends; onto a card id inserts at that position). The backend stores this shape as JSON (see `docs/DATABASE.md`).
 - `src/app/page.tsx` checks `GET /api/me` and shows `AuthForm` or `KanbanBoard`. `src/lib/api.ts` wraps every API call.
-- `src/components/KanbanBoard.tsx` loads the board from `GET /api/board`, owns its state and passes handlers (rename column, add/edit/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Every change sends the full board with `PUT /api/board` (saves chained in order). The default board lives in the backend (`backend/app/default_board.json`).
+- `src/components/KanbanBoard.tsx` loads the board from `GET /api/board`, owns its state and passes handlers (rename column, add/edit/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Every change sends the full board with `PUT /api/board` (saves chained in order). New accounts start with the 5 columns and no cards; the demo account starts with the sample cards in `backend/app/demo_board.json`.
 - Columns are fixed (renamable, not addable/removable).
