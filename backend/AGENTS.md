@@ -4,9 +4,16 @@ Python FastAPI app. Runs only inside the Docker container (see the root `Dockerf
 
 ## Structure
 
-- `app/main.py`: FastAPI app. API routes live under `/api` (currently `GET /api/health`). The `static/` directory is mounted at `/` last, so it never shadows `/api` routes.
+- `app/main.py`: FastAPI app and thin routes under `/api`. The `lifespan` creates the database (path from `DATABASE_PATH`, default `/app/data/my-kanban.db`) and the in-memory session store. The `static/` directory is mounted at `/` last, so it never shadows `/api` routes.
+  - `GET /api/health`
+  - `POST /api/register` (201; 409 if the username is taken, case-insensitive; 422 if invalid), `POST /api/login` (401 on bad credentials), `POST /api/logout` (204), `GET /api/me`. Register and login set an HttpOnly `session` cookie.
+  - `GET /api/board`, `PUT /api/board` (full board; 422 if invalid or inconsistent). Return 401 without a session.
+- `app/auth.py`: scrypt password hashing (`hash_password`, `verify_password`), in-memory sessions (`start_session`, `end_session`) and the `CurrentUserId` dependency.
+- `app/database.py`: SQLite access with `sqlite3` (no ORM). `init` creates the tables and seeds the demo account `user` / `password` once; `get_db` / `Db` gives each request its own connection. Schema and design in `docs/DATABASE.md`.
+- `app/models.py`: Pydantic models. `Board` / `Column` / `Card` mirror `BoardData` in `frontend/src/lib/kanban.ts` (`cardIds` via alias). `check_board_update` enforces fixed columns and that every card is in exactly one column.
+- `app/default_board.json`: starting board for the demo account and every new sign up.
 - `static/`: served at `/`. Not in the repo: the `Dockerfile` copies the exported Next.js build (`frontend/out/`) here.
-- `tests/`: pytest tests using FastAPI's `TestClient`. `pytest.ini` puts the backend root on the Python path.
+- `tests/`: pytest tests using FastAPI's `TestClient`. The `client` fixture in `conftest.py` points `DATABASE_PATH` at a temporary file and enters the app lifespan, so each test gets a fresh database. `pytest.ini` puts the backend root on the Python path. Password hashing takes ~0.7 s, so the suite takes ~20 s.
 - `requirements.txt`: all dependencies, including test ones, with pinned versions.
 
 ## Commands

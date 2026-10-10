@@ -65,15 +65,15 @@ Success criteria: user approval of `docs/DATABASE.md`.
 
 ## Part 5: Backend
 
-- [ ] Create the SQLite DB and tables on startup if missing; seed the demo `user` / `password` account and its default board (the current demo data)
-- [ ] Password hashing with `hashlib.scrypt` from the standard library (random salt per user, constant-time comparison); no extra dependency
-- [ ] `POST /api/register`: creates the user and their default board, then signs them in; 409 if the username is taken, 422 if the password is shorter than 8 characters or the username is empty
-- [ ] `POST /api/login` (checks the DB, sets the session cookie, 401 on bad credentials), `POST /api/logout` (clears the session), `GET /api/me` (current username or 401)
-- [ ] Pydantic models matching `BoardData` (`Card`, `Column`, `Board`)
-- [ ] `GET /api/board`: returns the signed-in user's board
-- [ ] `PUT /api/board`: validates and replaces the signed-in user's board
-- [ ] Routes stay thin; DB access and auth in their own modules; DB connection injected with `Depends` (see `backend/AGENTS.md`)
-- [ ] Update `backend/AGENTS.md`
+- [x] Create the SQLite DB and tables on startup if missing; seed the demo `user` / `password` account and its default board (the current demo data)
+- [x] Password hashing with `hashlib.scrypt` from the standard library (random salt per user, constant-time comparison); no extra dependency
+- [x] `POST /api/register`: creates the user and their default board, then signs them in; 409 if the username is taken, 422 if the password is shorter than 8 characters or the username is empty
+- [x] `POST /api/login` (checks the DB, sets the session cookie, 401 on bad credentials), `POST /api/logout` (clears the session), `GET /api/me` (current username or 401)
+- [x] Pydantic models matching `BoardData` (`Card`, `Column`, `Board`)
+- [x] `GET /api/board`: returns the signed-in user's board
+- [x] `PUT /api/board`: validates and replaces the signed-in user's board
+- [x] Routes stay thin; DB access and auth in their own modules; DB connection injected with `Depends` (see `backend/AGENTS.md`)
+- [x] Update `backend/AGENTS.md`
 
 Tests (each test uses its own temporary DB):
 - DB is created when the file does not exist, and reused when it does; the demo user is seeded once.
