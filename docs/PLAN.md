@@ -88,16 +88,18 @@ Success criteria: all backend tests pass inside the container; users and board d
 
 ## Part 6: Frontend + Backend
 
-- [ ] On load, call `/api/me`; show the sign in screen if not signed in, otherwise the board
-- [ ] Sign in screen with a toggle between "Sign in" and "Create account"; uses the color scheme (purple submit button) and shows the error from the API (bad credentials, username taken, password too short)
-- [ ] "Log out" button on the board
-- [ ] `KanbanBoard` loads the board from `GET /api/board` instead of `initialData`, with a simple loading state
-- [ ] Every change (move, add, edit, delete card, rename column) sends the full board with `PUT /api/board`; column rename is saved on blur, not on each keystroke
-- [ ] Remove `initialData` from the frontend (the default board now comes from the backend)
-- [ ] Update `frontend/AGENTS.md` and the root `CLAUDE.md` architecture section
+- [x] On load, call `/api/me`; show the sign in screen if not signed in, otherwise the board
+- [x] Sign in screen with a toggle between "Sign in" and "Create account"; uses the color scheme (purple submit button) and shows the error from the API (bad credentials, username taken, password too short)
+- [x] "Log out" button on the board
+- [x] `KanbanBoard` loads the board from `GET /api/board` instead of `initialData`, with a simple loading state
+- [x] Every change (move, add, edit, delete card, rename column) sends the full board with `PUT /api/board`; column rename is saved on blur, not on each keystroke
+- [x] Remove `initialData` from the frontend (the default board now comes from the backend)
+- [x] Update `frontend/AGENTS.md` and the root `CLAUDE.md` architecture section
 
 Tests:
 - Unit (mocked `fetch`): sign in form submits credentials, shows the error on 401, shows the board on success; create account shows the error on 409 and 422; board renders the data returned by the API; each action triggers a `PUT` with the expected board.
 - E2E (against the container): visiting `/` shows the sign in screen; wrong password shows an error; the demo account signs in and sees the board; a new account can be created and gets its own default board; changes of one user are not visible to another; each action (add, edit, delete, move card, rename column) survives a page reload; changes survive logging out and back in and a container restart; log out returns to the sign in screen.
+
+Note: the container restart is not part of the e2e suite (Playwright cannot restart the container); it is covered by `test_data_survives_a_restart` in the backend and was checked by hand against the real container in Part 5. Drag and drop is covered by e2e only (the pointer sensor does not run in jsdom).
 
 Success criteria: the app at `http://localhost:8000` supports sign up and sign in with a persistent board per user; all unit, e2e and backend tests pass.

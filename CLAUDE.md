@@ -51,7 +51,7 @@ A Project Management MVP web app:
 
 ## Current state
 
-Parts 1-5 are done. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000`, started and stopped with the scripts in `scripts/` (SQLite on the `my-kanban-data` volume); backend tests run with `docker run --rm my-kanban pytest`. The backend has sign up, sign in and board persistence (see `backend/AGENTS.md`), but the frontend does not use the API yet: the board still lives in React state only. Wiring them together is Part 6 in `docs/PLAN.md`.
+All parts of `docs/PLAN.md` are done. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000`, started and stopped with the scripts in `scripts/` (SQLite on the `my-kanban-data` volume); backend tests run with `docker run --rm my-kanban pytest`. Users sign up or sign in (demo account `user` / `password`) and get their own persistent board.
 
 ## Frontend commands
 
@@ -72,6 +72,7 @@ npx playwright test tests/kanban.spec.ts -g "test name"
 ## Frontend architecture
 
 - Next.js 16 App Router with static export (`output: "export"`), React 19, Tailwind v4, `@dnd-kit` for drag and drop. `@/` aliases `src/`.
-- `src/lib/kanban.ts` defines the data model and pure logic: `BoardData` is `{ columns: Column[], cards: Record<id, Card> }`, where each column holds an ordered `cardIds` list (cards are normalized, not nested). `moveCard` handles reordering within a column and moving across columns (dropping onto a column id appends; onto a card id inserts at that position). This shape is the natural basis for the backend schema.
-- `src/components/KanbanBoard.tsx` owns all board state (`useState` seeded from `initialData`, no persistence yet) and passes handlers (rename column, add/edit/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Wiring to the backend API in Part 6 replaces this local state source.
+- `src/lib/kanban.ts` defines the data model (mirrored by Pydantic models in `backend/app/models.py`) and pure logic: `BoardData` is `{ columns: Column[], cards: Record<id, Card> }`, where each column holds an ordered `cardIds` list (cards are normalized, not nested). `moveCard` handles reordering within a column and moving across columns (dropping onto a column id appends; onto a card id inserts at that position). The backend stores this shape as JSON (see `docs/DATABASE.md`).
+- `src/app/page.tsx` checks `GET /api/me` and shows `AuthForm` or `KanbanBoard`. `src/lib/api.ts` wraps every API call.
+- `src/components/KanbanBoard.tsx` loads the board from `GET /api/board`, owns its state and passes handlers (rename column, add/edit/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Every change sends the full board with `PUT /api/board` (saves chained in order). The default board lives in the backend (`backend/app/default_board.json`).
 - Columns are fixed (renamable, not addable/removable).
