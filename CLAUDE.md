@@ -51,7 +51,7 @@ A Project Management MVP web app:
 
 ## Current state
 
-Parts 1-3 are done. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000` (plus `/api/health`), started and stopped with the scripts in `scripts/`; backend tests run with `docker run --rm my-trello pytest`. The board is fully usable (including card editing) but lives in React state only. Sign in, SQLite and persistence are still to be built per `docs/PLAN.md`.
+Parts 1-4 are done (database design approved in `docs/DATABASE.md`). The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000` (plus `/api/health`), started and stopped with the scripts in `scripts/`; backend tests run with `docker run --rm my-kanban pytest`. The board is fully usable (including card editing) but lives in React state only. Sign in, SQLite and persistence are still to be built per `docs/PLAN.md`.
 
 ## Frontend commands
 

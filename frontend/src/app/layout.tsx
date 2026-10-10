@@ -13,7 +13,7 @@ const bodyFont = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "My Trello",
+  title: "My Kanban",
   description: "A focused, single-board kanban workspace.",
 };
 

@@ -17,7 +17,7 @@ def test_root_serves_exported_frontend():
     response = client.get("/")
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
-    assert "My Trello" in response.text
+    assert "My Kanban" in response.text
 
 
 def test_static_assets_are_served():

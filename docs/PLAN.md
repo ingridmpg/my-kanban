@@ -6,10 +6,10 @@ Work proceeds part by part. Each part has a checklist (checked off as work is do
 
 - **Single container, single port.** FastAPI serves the API under `/api/*` and the statically exported Next.js build (`output: "export"`) at `/`. The app runs on `http://localhost:8000`.
 - **Docker build.** Multi-stage `Dockerfile` at the repo root: a Node (current LTS) stage runs `npm ci && npm run build` to produce `frontend/out/`; a Python (latest stable, slim) stage installs `backend/requirements.txt` with pip and copies the backend code plus the exported frontend.
-- **Backend tests.** `pytest` runs inside the image: `docker run --rm my-trello pytest`. `pytest` and `httpx2` (needed by FastAPI's `TestClient`) are listed in the same `requirements.txt`.
+- **Backend tests.** `pytest` runs inside the image: `docker run --rm my-kanban pytest`. `pytest` and `httpx2` (needed by FastAPI's `TestClient`) are listed in the same `requirements.txt`.
 - **Frontend tests.** Unit tests (Vitest) run locally with mocked `fetch`. From Part 3 on, Playwright e2e tests run against the running container at `http://localhost:8000` (same origin for UI and API, no CORS or proxy setup needed).
 - **Scripts.** `scripts/start.sh` / `scripts/stop.sh` for Mac and Linux, `scripts/start.ps1` / `scripts/stop.ps1` for Windows. Start builds the image and runs the container in the background; stop stops and removes it.
-- **Database location.** SQLite file at `/app/data/my-trello.db` inside the container, on a named Docker volume so data survives restarts. Created on startup if missing.
+- **Database location.** SQLite file at `/app/data/my-kanban.db` inside the container, on a named Docker volume so data survives restarts. Created on startup if missing.
 - **Accounts.** Users sign up with a unique username and a password (minimum 8 characters). Passwords are hashed with `hashlib.scrypt` (standard library). A demo account `user` / `password` is seeded with the database.
 - **Sessions.** `POST /api/login` checks the credentials against the database and sets an HttpOnly cookie with a random session token kept in an in-memory dict on the backend. Restarting the container logs users out, which is acceptable for the MVP.
 - **Board persistence.** The board is read and written as a whole (`GET` / `PUT /api/board`) using the same JSON shape as `BoardData` in `frontend/src/lib/kanban.ts`.
@@ -55,11 +55,11 @@ Success criteria: the demo board is fully usable at `http://localhost:8000` from
 
 ## Part 4: Database modeling
 
-- [ ] Propose the schema in `docs/DATABASE.md`. Starting proposal:
+- [x] Propose the schema in `docs/DATABASE.md`. Starting proposal:
   - `users`: `id`, `username` (unique), `password_hash`, `created_at`
   - `boards`: `id`, `user_id` (unique FK to `users`, enforcing 1 board per user), `data` (board JSON in the `BoardData` shape), `updated_at`
-- [ ] Document how the DB is created on startup, how the demo `user` account and its board are seeded, how a new user's board is created on sign up, how passwords are hashed, and why the board is stored as JSON
-- [ ] User reviews and signs off
+- [x] Document how the DB is created on startup, how the demo `user` account and its board are seeded, how a new user's board is created on sign up, how passwords are hashed, and why the board is stored as JSON
+- [x] User reviews and signs off (approved 2026-10-10)
 
 Success criteria: user approval of `docs/DATABASE.md`.
 

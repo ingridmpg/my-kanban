@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
-app = FastAPI(title="My Trello")
+app = FastAPI(title="My Kanban")
 
 
 @app.get("/api/health")

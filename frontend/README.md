@@ -1,4 +1,4 @@
-# My Trello
+# My Kanban
 
 ## Run
 

@@ -14,8 +14,8 @@ Python FastAPI app. Runs only inside the Docker container (see the root `Dockerf
 From the repo root:
 
 ```bash
-docker build -t my-trello .
-docker run --rm my-trello pytest          # backend tests
+docker build -t my-kanban .
+docker run --rm my-kanban pytest          # backend tests
 ```
 
 ## Architecture

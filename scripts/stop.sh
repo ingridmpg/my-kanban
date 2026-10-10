@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-docker rm -f my-trello >/dev/null 2>&1 || true
+docker rm -f my-kanban >/dev/null 2>&1 || true
 
-echo "My Trello stopped"
+echo "My Kanban stopped"
