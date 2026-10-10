@@ -83,6 +83,17 @@ describe("KanbanBoard", () => {
       expect(screen.queryByText("Discarded")).not.toBeInTheDocument();
     });
 
+    it("keeps empty details empty", async () => {
+      render(<KanbanBoard />);
+      const column = getFirstColumn();
+      await userEvent.click(within(column).getByRole("button", { name: /add a card/i }));
+      await userEvent.type(within(column).getByPlaceholderText(/card title/i), "No notes");
+      await userEvent.click(within(column).getByRole("button", { name: /add card/i }));
+      await userEvent.click(within(column).getByRole("button", { name: "Edit No notes" }));
+
+      expect(within(column).getByLabelText("Card details")).toHaveValue("");
+    });
+
     it("does not save an empty title", async () => {
       const { titleInput } = await openEditForm();
       await userEvent.clear(titleInput);

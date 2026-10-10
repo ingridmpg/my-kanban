@@ -5,21 +5,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Read first
 
 - `AGENTS.md` (root) is authoritative. This file mirrors its specs below; if they ever disagree, AGENTS.md wins.
-- `docs/PLAN.md` is the phased execution plan (Parts 1-7). Work proceeds part by part, and Part 1 (plan) and Part 5 (database schema) require explicit user sign-off before moving on. All planning and progress documents (including checklists) live in `docs/`.
+- `docs/PLAN.md` is the phased execution plan (Parts 1-6). Work proceeds part by part, and Part 1 (plan) and Part 4 (database schema) require explicit user sign-off before moving on. All planning and progress documents (including checklists) live in `docs/`.
 - `backend/AGENTS.md`, `frontend/AGENTS.md` and `scripts/AGENTS.md` describe each subdirectory (each is imported by a `CLAUDE.md` next to it) and should be kept up to date as code is added.
 
 ## Business requirements
 
 A Project Management MVP web app:
 
-- A user can sign in.
+- A user can sign up (create an account) and sign in.
 - When signed in, the user sees a board representing their project.
 - The board has fixed columns that can be renamed.
 - The cards on the board can be moved with drag and drop, and edited.
 
 ## MVP limitations
 
-- Only one sign in, hardcoded to `user` / `password`, but the database must support multiple users for the future.
+- Users are stored in the database with hashed passwords. Anyone can sign up with a unique username and a password (minimum 8 characters). A demo account `user` / `password` is seeded when the database is created. No password reset or rate limiting.
 - Only 1 board per signed in user.
 - Runs locally, in a Docker container.
 
@@ -73,5 +73,5 @@ npx playwright test tests/kanban.spec.ts -g "test name"
 
 - Next.js 16 App Router with static export (`output: "export"`), React 19, Tailwind v4, `@dnd-kit` for drag and drop. `@/` aliases `src/`.
 - `src/lib/kanban.ts` defines the data model and pure logic: `BoardData` is `{ columns: Column[], cards: Record<id, Card> }`, where each column holds an ordered `cardIds` list (cards are normalized, not nested). `moveCard` handles reordering within a column and moving across columns (dropping onto a column id appends; onto a card id inserts at that position). This shape is the natural basis for the backend schema.
-- `src/components/KanbanBoard.tsx` owns all board state (`useState` seeded from `initialData`, no persistence yet) and passes handlers (rename column, add/edit/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Wiring to the backend API in Part 7 replaces this local state source.
+- `src/components/KanbanBoard.tsx` owns all board state (`useState` seeded from `initialData`, no persistence yet) and passes handlers (rename column, add/edit/delete card, drag end) down to `KanbanColumn` / `KanbanCard`. Wiring to the backend API in Part 6 replaces this local state source.
 - Columns are fixed (renamable, not addable/removable).

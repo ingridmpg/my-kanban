@@ -3,14 +3,14 @@
 ## Business Requirements
 
 This project is building a Project Management App. Key features:
-- A user can sign in
+- A user can sign up (create an account) and sign in
 - When signed in, the user sees a board representing their project
 - The board has fixed columns that can be renamed
 - The cards on the board can be moved with drag and drop, and edited
 
 ## Limitations
 
-For the MVP, there will only be a user sign in (hardcoded to 'user' and 'password') but the database will support multiple users for future.
+For the MVP, users are stored in the database with hashed passwords. Anyone can sign up with a unique username and a password (minimum 8 characters). A demo account ('user' / 'password') is seeded when the database is created. No password reset or rate limiting.
 
 For the MVP, there will only be 1 board per signed in user.
 

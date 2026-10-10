@@ -11,5 +11,5 @@ npm run dev
 
 ```bash
 npm run test:unit
-npm run test:e2e
+npm run test:e2e   # needs the container running (scripts/start.*)
 ```
