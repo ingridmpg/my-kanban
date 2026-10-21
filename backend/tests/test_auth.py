@@ -47,6 +47,13 @@ def test_login_sets_session_cookie(client):
     assert client.get("/api/me").json() == {"username": "user"}
 
 
+def test_session_cookie_is_secure_only_when_configured(client, monkeypatch):
+    assert "secure" not in login(client).headers["set-cookie"].lower()
+    monkeypatch.setenv("COOKIE_SECURE", "1")
+    assert "secure" in login(client).headers["set-cookie"].lower()
+    assert "secure" in register(client).headers["set-cookie"].lower()
+
+
 def test_login_is_case_insensitive_on_username(client):
     assert login(client, username="USER").json() == {"username": "user"}
 
@@ -72,7 +79,7 @@ def test_login_with_unknown_username_still_hashes(client, monkeypatch):
     assert len(calls) == 1
 
 
-def test_scrypt_runs_at_most_four_at_once(monkeypatch):
+def test_scrypt_concurrency_is_bounded(monkeypatch):
     running = peak = 0
     lock = threading.Lock()
 
@@ -89,7 +96,7 @@ def test_scrypt_runs_at_most_four_at_once(monkeypatch):
     monkeypatch.setattr(auth.hashlib, "scrypt", fake_scrypt)
     with ThreadPoolExecutor(max_workers=8) as pool:
         list(pool.map(auth.hash_password, ["secret-pass"] * 8))
-    assert peak == 4
+    assert peak == auth.SCRYPT_CONCURRENCY == 2
 
 
 def test_me_without_session_returns_401(client):

@@ -14,7 +14,7 @@ For the MVP, users are stored in the database with hashed passwords. Anyone can 
 
 For the MVP, there will only be 1 board per signed in user.
 
-For the MVP, this will run locally (in a docker container)
+For the MVP, this will run locally (in a docker container), and online as a portfolio demo on the Render free plan (temporary disk: data is reset on every restart or deploy)
 
 ## Technical Decisions
 

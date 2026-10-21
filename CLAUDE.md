@@ -21,7 +21,7 @@ A Project Management MVP web app:
 
 - Users are stored in the database with hashed passwords. Anyone can sign up with a unique username and a password (minimum 8 characters). A demo account `user` / `password` is seeded when the database is created. No password reset or rate limiting.
 - Only 1 board per signed in user.
-- Runs locally, in a Docker container.
+- Runs locally, in a Docker container, and online as a portfolio demo on the Render free plan (`render.yaml`; temporary disk, so data is reset on every restart or deploy).
 
 ## Technical decisions
 
@@ -54,7 +54,7 @@ A Project Management MVP web app:
 
 ## Current state
 
-Parts 1-7 of `docs/PLAN.md` are done; Part 8 (code review and deploy) is approved and in progress. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000`, started and stopped with the scripts in `scripts/` (SQLite on the `my-kanban-data` volume); backend tests run with `docker run --rm my-kanban pytest`. Users sign up or sign in (demo account `user` / `password`) and get their own persistent board.
+Parts 1-7 of `docs/PLAN.md` are done; Part 8 (code review and deploy to the Render free plan, `render.yaml`) is approved and in progress. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000`, started and stopped with the scripts in `scripts/` (SQLite on the `my-kanban-data` volume); backend tests run with `docker run --rm my-kanban pytest`. Users sign up or sign in (demo account `user` / `password`) and get their own persistent board.
 
 ## Frontend commands
 

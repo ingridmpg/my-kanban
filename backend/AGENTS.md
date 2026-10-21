@@ -6,10 +6,10 @@ Python FastAPI app. Runs only inside the Docker container (see the root `Dockerf
 
 - `app/main.py`: FastAPI app and thin routes under `/api`. The `lifespan` creates the database (path from `DATABASE_PATH`, default `/app/data/my-kanban.db`) and the in-memory session store. The `static/` directory is mounted at `/` last, so it never shadows `/api` routes.
   - `GET /api/health`
-  - `POST /api/register` (201; 409 if the username is taken, case-insensitive; 422 if invalid), `POST /api/login` (401 on bad credentials), `POST /api/logout` (204), `GET /api/me`. Register and login set an HttpOnly `session` cookie.
+  - `POST /api/register` (201; 409 if the username is taken, case-insensitive; 422 if invalid), `POST /api/login` (401 on bad credentials), `POST /api/logout` (204), `GET /api/me`. Register and login set an HttpOnly `session` cookie, also `Secure` when `COOKIE_SECURE=1` (production).
   - `GET /api/board`, `PUT /api/board` (full board; 422 if invalid or inconsistent). Return 401 without a session.
-- `app/auth.py`: scrypt password hashing (`hash_password`, `verify_password`; at most 4 hashes at once to bound memory; `verify_password` with no stored hash still hashes, so unknown usernames take as long as wrong passwords), in-memory sessions (`start_session`, `end_session`) and the `CurrentUserId` dependency.
-- `app/database.py`: SQLite access with `sqlite3` (no ORM). `init` creates the tables and seeds the demo account `user` / `password` once; `get_db` / `Db` gives each request its own connection. Schema and design in `docs/DATABASE.md`.
+- `app/auth.py`: scrypt password hashing (`hash_password`, `verify_password`; at most `SCRYPT_CONCURRENCY` (2) hashes at once to fit the 512 MB of the Render free plan; `verify_password` with no stored hash still hashes, so unknown usernames take as long as wrong passwords), in-memory sessions (`start_session`, `end_session`) and the `CurrentUserId` dependency.
+- `app/database.py`: SQLite access with `sqlite3` (no ORM). `init` creates the tables, seeds the demo account `user` / `password` once and resets its board to `demo_board.json` on every start; `get_db` / `Db` gives each request its own connection. Schema and design in `docs/DATABASE.md`.
 - `app/models.py`: Pydantic models. `Board` / `Column` / `Card` mirror `BoardData` in `frontend/src/lib/kanban.ts` (`cardIds` via alias). `check_board_update` enforces fixed columns and that every card is in exactly one column.
 - `app/demo_board.json`: the demo account's board (5 columns, 8 sample cards). New sign ups get `EMPTY_BOARD` from `app/database.py`: the same columns with no cards.
 - `static/`: served at `/`. Not in the repo: the `Dockerfile` copies the exported Next.js build (`frontend/out/`) here.

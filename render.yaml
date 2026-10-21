@@ -1,0 +1,15 @@
+# Render Blueprint. Free plan: temporary disk (the database starts fresh on every restart or
+# deploy) and the service sleeps when idle. One instance: sessions live in memory.
+services:
+  - type: web
+    name: ingrid-kanban
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: PORT
+        value: "8000"

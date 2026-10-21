@@ -111,6 +111,10 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
         >
           {isSignIn ? "New here? Create an account" : "Already have an account? Sign in"}
         </button>
+
+        <p className="mt-6 text-center text-xs text-[var(--muted)]">
+          This is a demo: accounts and boards are reset from time to time.
+        </p>
       </section>
     </main>
   );

@@ -69,7 +69,7 @@ Login returns the same 401 for an unknown user and a wrong password, so it does 
 
 - The database file is `/app/data/my-kanban.db`. The path comes from the `DATABASE_PATH` environment variable with that default, so tests can point it to a temporary file.
 - `/app/data` is a named Docker volume (`my-kanban-data`), mounted by `scripts/start.*`, so the database survives container restarts and image rebuilds. `scripts/stop.*` keep the volume; deleting it (`docker volume rm my-kanban-data`) resets all data.
-- On startup (FastAPI `lifespan`), the backend creates the directory and the tables if missing (`CREATE TABLE IF NOT EXISTS`). If no user named `user` exists, it creates the demo account `user` / `password` with the demo board. Restarting never duplicates or resets it.
+- On startup (FastAPI `lifespan`), the backend creates the directory and the tables if missing (`CREATE TABLE IF NOT EXISTS`). If no user named `user` exists, it creates the demo account `user` / `password` with the demo board. Restarting never duplicates it, but resets its board to the demo board: every visitor shares the demo account, so each start (restart or deploy) restores it. On the Render free plan the disk is temporary, so the whole database starts fresh on every restart or deploy.
 - The demo board (5 columns, 8 sample cards) lives in `backend/app/demo_board.json` and is used only for the demo account. Every new sign up starts with the same 5 columns and no cards.
 - Sign up creates the user row and its board row in one transaction, so there is never a user without a board.
 

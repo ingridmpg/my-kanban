@@ -46,12 +46,16 @@ def connect(path: Path) -> sqlite3.Connection:
 
 
 def init(path: Path) -> None:
-    """Create the database and tables if missing, and seed the demo account once."""
+    """Create the database and tables if missing, seed the demo account once and reset
+    its board. Every visitor shares the demo account, so each start restores its board."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with closing(connect(path)) as conn:
         conn.executescript(SCHEMA)
-        if find_user(conn, DEMO_USERNAME) is None:
+        demo = find_user(conn, DEMO_USERNAME)
+        if demo is None:
             create_user(conn, DEMO_USERNAME, hash_password(DEMO_PASSWORD), DEMO_BOARD)
+        else:
+            save_board(conn, demo["id"], json.loads(DEMO_BOARD))
 
 
 def get_db(request: Request) -> Iterator[sqlite3.Connection]:

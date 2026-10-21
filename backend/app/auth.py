@@ -12,8 +12,10 @@ SESSION_COOKIE = "session"
 # OWASP minimum for scrypt; needs ~128 MB, above hashlib's default maxmem.
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 2**17, 8, 1
 SCRYPT_MAXMEM = 2**28
-# At most this many hashes run at once, so concurrent sign ins cannot exhaust memory.
-_scrypt_slots = threading.BoundedSemaphore(4)
+# At most this many hashes run at once, so concurrent sign ins cannot exhaust memory
+# (512 MB on the Render free plan).
+SCRYPT_CONCURRENCY = 2
+_scrypt_slots = threading.BoundedSemaphore(SCRYPT_CONCURRENCY)
 
 
 def _scrypt(password: str, salt: bytes, n: int, r: int, p: int) -> bytes:
@@ -49,15 +51,22 @@ Sessions = Annotated[dict[str, int], Depends(get_sessions)]
 SessionToken = Annotated[str | None, Cookie(alias=SESSION_COOKIE)]
 
 
+# Set in production (HTTPS only); local runs over http need the cookie without Secure.
+def _secure_cookie() -> bool:
+    return os.environ.get("COOKIE_SECURE") == "1"
+
+
 def start_session(response: Response, sessions: dict[str, int], user_id: int) -> None:
     token = secrets.token_urlsafe(32)
     sessions[token] = user_id
-    response.set_cookie(SESSION_COOKIE, token, httponly=True, samesite="lax")
+    response.set_cookie(
+        SESSION_COOKIE, token, httponly=True, samesite="lax", secure=_secure_cookie()
+    )
 
 
 def end_session(response: Response, sessions: dict[str, int], token: str | None) -> None:
     sessions.pop(token, None)
-    response.delete_cookie(SESSION_COOKIE)
+    response.delete_cookie(SESSION_COOKIE, httponly=True, samesite="lax", secure=_secure_cookie())
 
 
 def current_user_id(sessions: Sessions, token: SessionToken = None) -> int:

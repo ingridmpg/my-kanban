@@ -28,6 +28,11 @@ describe("AuthForm", () => {
     ]);
   });
 
+  it("says that demo data is reset", () => {
+    render(<AuthForm onSignedIn={vi.fn()} />);
+    expect(screen.getByText(/accounts and boards are reset/i)).toBeInTheDocument();
+  });
+
   it("fills in the demo account, only when signing in", async () => {
     render(<AuthForm onSignedIn={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Use demo account" }));

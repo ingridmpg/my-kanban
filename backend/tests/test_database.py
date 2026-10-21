@@ -37,15 +37,33 @@ def test_passwords_are_stored_hashed(client, db_path):
         assert "password" not in stored
 
 
+def rename_first_column(client, username, password, title):
+    client.post("/api/login", json={"username": username, "password": password})
+    board = client.get("/api/board").json()
+    board["columns"][0]["title"] = title
+    client.put("/api/board", json=board)
+
+
+def first_column_title(client, username, password):
+    client.post("/api/login", json={"username": username, "password": password})
+    return client.get("/api/board").json()["columns"][0]["title"]
+
+
 def test_data_survives_a_restart(db_path):
     with TestClient(app) as client:
-        client.post("/api/login", json={"username": "user", "password": "password"})
-        board = client.get("/api/board").json()
-        board["columns"][0]["title"] = "Ideas"
-        client.put("/api/board", json=board)
+        client.post("/api/register", json={"username": "ingrid", "password": "secret-pass"})
+        rename_first_column(client, "ingrid", "secret-pass", "Ideas")
 
     # A new lifespan is a restart: sessions are gone, data is not.
     with TestClient(app) as client:
         assert client.get("/api/board").status_code == 401
-        client.post("/api/login", json={"username": "user", "password": "password"})
-        assert client.get("/api/board").json()["columns"][0]["title"] == "Ideas"
+        assert first_column_title(client, "ingrid", "secret-pass") == "Ideas"
+
+
+def test_demo_board_is_reset_on_restart(db_path):
+    with TestClient(app) as client:
+        rename_first_column(client, "user", "password", "Vandalized")
+        assert first_column_title(client, "user", "password") == "Vandalized"
+
+    with TestClient(app) as client:
+        assert first_column_title(client, "user", "password") == "Backlog"

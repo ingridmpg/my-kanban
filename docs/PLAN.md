@@ -127,14 +127,16 @@ Success criteria: all unit, e2e and backend tests pass; the new look checked wit
 
 ## Part 8: Code review and deploy
 
-Publish the app online at a public HTTPS URL. Decisions approved by the user on 2026-10-20.
+Publish the app online at a public HTTPS URL, for free, as a portfolio demo. Decisions approved by the user on 2026-10-20 and 2026-10-21.
 
 Decisions:
-- **Platform: Fly.io.** It deploys the existing `Dockerfile` as is, gives HTTPS on `<app>.fly.dev`, and has persistent volumes for SQLite with daily snapshots. Alternatives: Railway (also has volumes), Render (persistent disk only on paid plans).
-- **One machine only.** Sessions live in memory and SQLite is a local file, so the app must run on exactly one machine (no autoscaling). A restart or deploy signs everyone out, as today.
-- **Memory.** Each scrypt hash uses ~128 MB, so a few concurrent sign ins would exhaust a 256 MB machine. Use at least 1 GB.
-- **Demo account.** On the internet, anyone can change or empty the shared demo board, so the demo board is reset to `demo_board.json` on every startup (each deploy or restart restores it).
-- **Open sign up, no rate limiting.** Kept from the MVP limitations; acceptable for a demo, and revisited only if it becomes a problem.
+- **Platform: Render, free plan.** It builds the existing `Dockerfile` from the GitHub repo and gives HTTPS on `<service>.onrender.com`. Fly.io was tried first (2026-10-21) and removed: it has no free plan for new accounts.
+- **Temporary disk.** The free plan has no persistent disk, so the SQLite database starts empty on every restart or deploy (with the demo account seeded). Accounts created by visitors are lost then; acceptable for a demo, and said on the sign in screen and in the README.
+- **Cold starts.** The free service sleeps after 15 minutes without traffic; the first request after that takes a while to wake it.
+- **One instance.** Sessions live in memory and SQLite is a local file, so the app runs as a single instance. A restart signs everyone out, as today.
+- **Memory.** The free plan has 512 MB and each scrypt hash uses ~128 MB, so at most 2 hashes run at once.
+- **Demo account.** The demo board is reset to `demo_board.json` on every startup, so a visitor's changes do not stay for the next one.
+- **Open sign up, no rate limiting.** Kept from the MVP limitations; acceptable for a demo.
 
 Checklist:
 - [x] Code review of Parts 4-7 (`1fd02d6..HEAD`) and fix the findings (2026-10-20). Fixed:
@@ -146,16 +148,20 @@ Checklist:
   - Login trims the username like sign up does
   - The submit button of the sign in form is disabled while the request is in flight
   - Accepted: two tabs on the same board, last save wins (the board is saved as a whole); an old `my-trello` container from before the rename may still hold port 8000 (`docker rm -f my-trello`)
-- [x] User reviews and approves this part (approved 2026-10-20: Fly.io, reset the demo board on startup)
-- [ ] Reset the demo account's board to `demo_board.json` on startup (in `database.init`)
-- [ ] Session cookie gets the `Secure` flag when `COOKIE_SECURE=1` (set in production; local http runs keep working)
-- [ ] `fly.toml`: one machine, 1 GB, volume mounted at `/app/data`, health check on `/api/health`, `COOKIE_SECURE=1`
-- [ ] First deploy with `fly launch` / `fly deploy`; the user creates the Fly.io account and signs in (`fly auth login`)
-- [ ] Update `AGENTS.md` and `CLAUDE.md` ("runs locally" becomes "runs locally or on Fly.io"), `backend/AGENTS.md`, `scripts/AGENTS.md` if a deploy script is added, and a minimal root `README.md` with the public URL, how to deploy, and that the demo account is shared by every visitor and its board is reset on every restart or deploy
+- [x] User reviews and approves this part (2026-10-20: Fly.io and demo board reset; 2026-10-21: switch to the Render free plan with a temporary disk)
+- [x] Reset the demo account's board to `demo_board.json` on startup (in `database.init`)
+- [x] Session cookie gets the `Secure` flag when `COOKIE_SECURE=1` (set in production; local http runs keep working)
+- [x] Fly.io deploy tried and removed (no free plan); `fly.toml` deleted
+- [x] At most 2 scrypt hashes at once (512 MB)
+- [x] Sign in screen says that demo data is reset from time to time
+- [x] `render.yaml` (Blueprint): Docker runtime, free plan, health check on `/api/health`, `COOKIE_SECURE=1`, `PORT=8000`
+- [ ] First deploy: the user creates the Render account, pushes to GitHub and creates the Blueprint from the repo
+- [ ] Update `AGENTS.md` and `CLAUDE.md` ("runs locally" becomes "runs locally or on Render"), `backend/AGENTS.md`, `frontend/AGENTS.md`, and a minimal root `README.md` with the public URL, how to deploy, the cold start, and that data (including the demo board) is reset on every restart or deploy
 
 Tests:
-- Backend: with `COOKIE_SECURE=1`, register and login set a `Secure` cookie; without it they do not. After the demo board is changed, restarting the app (re-entering the lifespan on the same database) restores it; other users' boards are untouched.
-- E2E: the existing suite passes against the public URL with `BASE_URL=https://<app>.fly.dev npm run test:e2e` (sign up, add, edit, move, delete cards, persistence after reload).
-- Manual: data survives a redeploy (volume), and `/api/health` is green in the Fly.io dashboard.
+- Backend: with `COOKIE_SECURE=1`, register and login set a `Secure` cookie; without it they do not. After the demo board is changed, restarting the app restores it; other users' boards survive a restart (locally, on the Docker volume). At most 2 hashes run at once.
+- Unit: the sign in screen shows the reset notice.
+- E2E: the existing suite passes against the public URL with `BASE_URL=https://<service>.onrender.com npm run test:e2e`.
+- Manual: `/api/health` is green in the Render dashboard.
 
-Success criteria: no open findings from the code review; the app is reachable over HTTPS at the public URL; all backend, unit and e2e tests pass (e2e against the public URL); boards persist across deploys.
+Success criteria: no open findings from the code review; the app is reachable over HTTPS at the public URL; all backend, unit and e2e tests pass (e2e against the public URL).
