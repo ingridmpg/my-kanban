@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/core";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { KanbanCardPreview } from "@/components/KanbanCardPreview";
-import { api } from "@/lib/api";
+import { api, isUnauthorized } from "@/lib/api";
 import { createId, findColumnId, moveCard, type BoardData } from "@/lib/kanban";
 
 // Each column gets its own pastel from the palette in globals.css.
@@ -40,6 +40,7 @@ export const KanbanBoard = ({ username, onSignedOut }: KanbanBoardProps) => {
   const [board, setBoard] = useState<BoardData | null>(null);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [overColumnId, setOverColumnId] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const saveQueue = useRef(Promise.resolve());
 
@@ -49,12 +50,19 @@ export const KanbanBoard = ({ username, onSignedOut }: KanbanBoardProps) => {
     })
   );
 
+  // A 401 means the session is gone (e.g. the server restarted), so go back to sign in.
   useEffect(() => {
-    api.getBoard().then(setBoard);
-  }, []);
+    api.getBoard().then(setBoard, (error) =>
+      isUnauthorized(error) ? onSignedOut() : setLoadFailed(true)
+    );
+  }, [onSignedOut]);
 
   if (!board) {
-    return (
+    return loadFailed ? (
+      <p role="alert" className="p-12 text-sm font-semibold text-[var(--danger)]">
+        Could not load the board. Reload the page to try again.
+      </p>
+    ) : (
       <p className="p-12 text-sm font-semibold text-[var(--muted)]">Loading board...</p>
     );
   }
@@ -65,8 +73,8 @@ export const KanbanBoard = ({ username, onSignedOut }: KanbanBoardProps) => {
     saveQueue.current = saveQueue.current
       .then(() => api.saveBoard(next))
       .then(
-        () => undefined,
-        () => setSaveFailed(true)
+        () => setSaveFailed(false),
+        (error) => (isUnauthorized(error) ? onSignedOut() : setSaveFailed(true))
       );
   };
 
@@ -151,7 +159,8 @@ export const KanbanBoard = ({ username, onSignedOut }: KanbanBoardProps) => {
   };
 
   const handleLogout = () => {
-    api.logout().then(onSignedOut);
+    // Pending saves go first, while the session is still valid.
+    saveQueue.current.then(api.logout).then(onSignedOut);
   };
 
   const activeCard = activeCardId ? board.cards[activeCardId] : null;

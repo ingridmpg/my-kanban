@@ -13,10 +13,12 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    setSubmitting(true);
     try {
       const user = await (isSignIn ? api.login : api.register)(username, password);
       onSignedIn(user.username);
@@ -26,6 +28,7 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
           ? "Username must be 1 to 50 characters and password at least 8 characters."
           : (err as Error).message
       );
+      setSubmitting(false);
     }
   };
 
@@ -94,7 +97,8 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
           )}
           <button
             type="submit"
-            className="w-full rounded-full bg-[var(--secondary)] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110"
+            disabled={submitting}
+            className="w-full rounded-full bg-[var(--secondary)] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110 disabled:opacity-60"
           >
             {isSignIn ? "Sign in" : "Create account"}
           </button>

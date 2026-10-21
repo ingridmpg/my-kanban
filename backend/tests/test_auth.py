@@ -1,3 +1,9 @@
+import hashlib
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+from app import auth
 from app.auth import SESSION_COOKIE
 
 
@@ -49,6 +55,41 @@ def test_login_rejects_bad_credentials(client):
     assert login(client, password="wrong-password").status_code == 401
     assert login(client, username="nobody").status_code == 401
     assert SESSION_COOKIE not in client.cookies
+
+
+def test_login_trims_username(client):
+    register(client)
+    assert login(client, username="  ingrid  ", password="secret-pass").status_code == 200
+
+
+def test_login_with_unknown_username_still_hashes(client, monkeypatch):
+    calls = []
+    real_scrypt = hashlib.scrypt
+    monkeypatch.setattr(
+        auth.hashlib, "scrypt", lambda *args, **kwargs: calls.append(1) or real_scrypt(*args, **kwargs)
+    )
+    assert login(client, username="nobody").status_code == 401
+    assert len(calls) == 1
+
+
+def test_scrypt_runs_at_most_four_at_once(monkeypatch):
+    running = peak = 0
+    lock = threading.Lock()
+
+    def fake_scrypt(*args, **kwargs):
+        nonlocal running, peak
+        with lock:
+            running += 1
+            peak = max(peak, running)
+        time.sleep(0.05)
+        with lock:
+            running -= 1
+        return bytes(64)
+
+    monkeypatch.setattr(auth.hashlib, "scrypt", fake_scrypt)
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(auth.hash_password, ["secret-pass"] * 8))
+    assert peak == 4
 
 
 def test_me_without_session_returns_401(client):

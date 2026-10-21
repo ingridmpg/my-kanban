@@ -18,12 +18,19 @@ const request = async <T>(method: string, path: string, body?: unknown): Promise
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (!response.ok) {
-    // FastAPI errors carry a string detail, or a list of field errors for 422.
-    const { detail } = await response.json();
-    throw new ApiError(response.status, typeof detail === "string" ? detail : "Invalid request");
+    // FastAPI errors carry a string detail, or a list of field errors for 422. Errors from
+    // elsewhere (e.g. a proxy's HTML 502 page) are not JSON.
+    const { detail } = await response.json().catch(() => ({}));
+    throw new ApiError(
+      response.status,
+      typeof detail === "string" ? detail : `Request failed (${response.status})`
+    );
   }
   return response.status === 204 ? (undefined as T) : response.json();
 };
+
+export const isUnauthorized = (error: unknown) =>
+  error instanceof ApiError && error.status === 401;
 
 export const api = {
   me: () => request<User>("GET", "/api/me"),

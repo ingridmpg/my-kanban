@@ -2,7 +2,7 @@ import { vi } from "vitest";
 import type { BoardData } from "@/lib/kanban";
 
 type Reply = { status: number; body?: unknown };
-type Routes = Record<string, (body: unknown) => Reply>;
+type Routes = Record<string, (body: unknown) => Reply | Promise<Reply>>;
 
 // Stubs fetch with handlers keyed by "METHOD /path". Unknown requests fail the test.
 export const mockApi = (routes: Routes) => {
@@ -12,7 +12,7 @@ export const mockApi = (routes: Routes) => {
     if (!handler) {
       throw new Error(`Unexpected request: ${key}`);
     }
-    const { status, body } = handler(init?.body ? JSON.parse(init.body as string) : undefined);
+    const { status, body } = await handler(init?.body ? JSON.parse(init.body as string) : undefined);
     return new Response(body === undefined ? null : JSON.stringify(body), { status });
   });
   vi.stubGlobal("fetch", fetchMock);

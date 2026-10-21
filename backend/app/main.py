@@ -46,7 +46,8 @@ def register(account: NewAccount, response: Response, db: Db, sessions: Sessions
 @app.post("/api/login")
 def login(credentials: Credentials, response: Response, db: Db, sessions: Sessions) -> User:
     user = database.find_user(db, credentials.username)
-    if user is None or not auth.verify_password(credentials.password, user["password_hash"]):
+    stored_hash = user["password_hash"] if user else None
+    if not auth.verify_password(credentials.password, stored_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
     auth.start_session(response, sessions, user["id"])
     return User(username=user["username"])

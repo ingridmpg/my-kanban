@@ -54,6 +54,25 @@ describe("AuthForm", () => {
     expect(onSignedIn).not.toHaveBeenCalled();
   });
 
+  it("disables the submit button while the request is in flight", async () => {
+    let reject = () => {};
+    mockApi({
+      "POST /api/login": () =>
+        new Promise((resolve) => {
+          reject = () => resolve({ status: 401, body: { detail: "Invalid username or password" } });
+        }),
+    });
+    render(<AuthForm onSignedIn={vi.fn()} />);
+
+    await fillAndSubmit("user", "wrong-password");
+    const submit = screen.getByRole("button", { name: /^sign in$/i });
+    expect(submit).toBeDisabled();
+
+    reject();
+    await screen.findByRole("alert");
+    expect(submit).toBeEnabled();
+  });
+
   it("creates an account", async () => {
     const fetchMock = mockApi({
       "POST /api/register": () => ({ status: 201, body: { username: "ingrid" } }),

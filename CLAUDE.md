@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Read first
 
 - `AGENTS.md` (root) is authoritative. This file mirrors its specs below; if they ever disagree, AGENTS.md wins.
-- `docs/PLAN.md` is the phased execution plan (Parts 1-6). Work proceeds part by part, and Part 1 (plan) and Part 4 (database schema) require explicit user sign-off before moving on. All planning and progress documents (including checklists) live in `docs/`.
+- `docs/PLAN.md` is the phased execution plan (Parts 1-8). Work proceeds part by part, and Part 1 (plan), Part 4 (database schema) and Part 8 (deploy) require explicit user sign-off before moving on. All planning and progress documents (including checklists) live in `docs/`.
 - `backend/AGENTS.md`, `frontend/AGENTS.md` and `scripts/AGENTS.md` describe each subdirectory (each is imported by a `CLAUDE.md` next to it) and should be kept up to date as code is added.
 
 ## Business requirements
@@ -54,7 +54,7 @@ A Project Management MVP web app:
 
 ## Current state
 
-All parts of `docs/PLAN.md` are done. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000`, started and stopped with the scripts in `scripts/` (SQLite on the `my-kanban-data` volume); backend tests run with `docker run --rm my-kanban pytest`. Users sign up or sign in (demo account `user` / `password`) and get their own persistent board.
+Parts 1-7 of `docs/PLAN.md` are done; Part 8 (code review and deploy) is approved and in progress. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000`, started and stopped with the scripts in `scripts/` (SQLite on the `my-kanban-data` volume); backend tests run with `docker run --rm my-kanban pytest`. Users sign up or sign in (demo account `user` / `password`) and get their own persistent board.
 
 ## Frontend commands
 

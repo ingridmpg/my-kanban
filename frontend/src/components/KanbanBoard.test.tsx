@@ -79,6 +79,64 @@ describe("KanbanBoard", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(/could not be saved/i);
   });
 
+  it("goes back to sign in when the session is gone on load", async () => {
+    mockApi({ "GET /api/board": () => ({ status: 401, body: { detail: "Not signed in" } }) });
+    const onSignedOut = vi.fn();
+    render(<KanbanBoard username="ingrid" onSignedOut={onSignedOut} />);
+    await waitFor(() => expect(onSignedOut).toHaveBeenCalled());
+  });
+
+  it("shows an error when the board cannot be loaded", async () => {
+    mockApi({ "GET /api/board": () => ({ status: 500, body: { detail: "Server error" } }) });
+    render(<KanbanBoard username="ingrid" onSignedOut={vi.fn()} />);
+    expect(await screen.findByRole("alert")).toHaveTextContent(/could not load the board/i);
+  });
+
+  it("goes back to sign in when the session is gone on save", async () => {
+    const { onSignedOut } = await renderBoard({ saveStatus: 401 });
+    await userEvent.click(within(getCard()).getByRole("button", { name: "Delete First card" }));
+    await waitFor(() => expect(onSignedOut).toHaveBeenCalled());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("clears the save error once a later save succeeds", async () => {
+    const statuses = [500, 200];
+    mockApi({
+      "GET /api/board": () => ({ status: 200, body: testBoard }),
+      "PUT /api/board": (body) => ({ status: statuses.shift()!, body }),
+    });
+    render(<KanbanBoard username="ingrid" onSignedOut={vi.fn()} />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Delete First card" })
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(/could not be saved/i);
+
+    await userEvent.click(screen.getByRole("button", { name: "Delete Second card" }));
+    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
+  });
+
+  it("logs out after pending saves", async () => {
+    let finishSave = () => {};
+    const fetchMock = mockApi({
+      "GET /api/board": () => ({ status: 200, body: testBoard }),
+      "PUT /api/board": (body) =>
+        new Promise((resolve) => (finishSave = () => resolve({ status: 200, body }))),
+      "POST /api/logout": () => ({ status: 204 }),
+    });
+    const onSignedOut = vi.fn();
+    render(<KanbanBoard username="ingrid" onSignedOut={onSignedOut} />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Delete First card" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: /log out/i }));
+    expect(requestBodies(fetchMock, "POST /api/logout")).toHaveLength(0);
+
+    finishSave();
+    await waitFor(() => expect(onSignedOut).toHaveBeenCalled());
+    const calls = fetchMock.mock.calls.map(([path, init]) => `${init?.method ?? "GET"} ${path}`);
+    expect(calls.slice(-2)).toEqual(["PUT /api/board", "POST /api/logout"]);
+  });
+
   it("logs out", async () => {
     const { fetchMock, onSignedOut } = await renderBoard();
     await userEvent.click(screen.getByRole("button", { name: /log out/i }));

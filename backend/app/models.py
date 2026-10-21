@@ -6,7 +6,7 @@ Username = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1,
 
 
 class Credentials(BaseModel):
-    username: str
+    username: Username
     password: str
 
 

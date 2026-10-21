@@ -1,6 +1,6 @@
 # Plan
 
-Work proceeds part by part. Each part has a checklist (checked off as work is done), the tests to write, and success criteria. A part is only done when all its tests pass. Parts 1 and 4 require explicit user sign-off.
+Work proceeds part by part. Each part has a checklist (checked off as work is done), the tests to write, and success criteria. A part is only done when all its tests pass. Parts 1, 4 and 8 require explicit user sign-off.
 
 ## Key decisions
 
@@ -124,3 +124,38 @@ Tests:
 - Unit: the demo hint fills in the fields and only shows when signing in; existing tests keep passing (the icon buttons keep the "Edit <title>" / "Delete <title>" labels).
 
 Success criteria: all unit, e2e and backend tests pass; the new look checked with screenshots of the sign in screen, the board, a card and the edit form.
+
+## Part 8: Code review and deploy
+
+Publish the app online at a public HTTPS URL. Decisions approved by the user on 2026-10-20.
+
+Decisions:
+- **Platform: Fly.io.** It deploys the existing `Dockerfile` as is, gives HTTPS on `<app>.fly.dev`, and has persistent volumes for SQLite with daily snapshots. Alternatives: Railway (also has volumes), Render (persistent disk only on paid plans).
+- **One machine only.** Sessions live in memory and SQLite is a local file, so the app must run on exactly one machine (no autoscaling). A restart or deploy signs everyone out, as today.
+- **Memory.** Each scrypt hash uses ~128 MB, so a few concurrent sign ins would exhaust a 256 MB machine. Use at least 1 GB.
+- **Demo account.** On the internet, anyone can change or empty the shared demo board, so the demo board is reset to `demo_board.json` on every startup (each deploy or restart restores it).
+- **Open sign up, no rate limiting.** Kept from the MVP limitations; acceptable for a demo, and revisited only if it becomes a problem.
+
+Checklist:
+- [x] Code review of Parts 4-7 (`1fd02d6..HEAD`) and fix the findings (2026-10-20). Fixed:
+  - Log out waits for pending saves, so the last change is not lost
+  - A 401 on loading or saving the board (session gone, e.g. after a deploy) goes back to sign in; other load errors show an alert instead of "Loading board..." forever; the save alert clears after a later save succeeds
+  - `api.ts` handles error bodies that are not JSON (e.g. a proxy's HTML 502)
+  - At most 4 scrypt hashes run at once (~128 MB each), so concurrent sign ins cannot exhaust memory
+  - Login with an unknown username still hashes once, so response time does not reveal which usernames exist
+  - Login trims the username like sign up does
+  - The submit button of the sign in form is disabled while the request is in flight
+  - Accepted: two tabs on the same board, last save wins (the board is saved as a whole); an old `my-trello` container from before the rename may still hold port 8000 (`docker rm -f my-trello`)
+- [x] User reviews and approves this part (approved 2026-10-20: Fly.io, reset the demo board on startup)
+- [ ] Reset the demo account's board to `demo_board.json` on startup (in `database.init`)
+- [ ] Session cookie gets the `Secure` flag when `COOKIE_SECURE=1` (set in production; local http runs keep working)
+- [ ] `fly.toml`: one machine, 1 GB, volume mounted at `/app/data`, health check on `/api/health`, `COOKIE_SECURE=1`
+- [ ] First deploy with `fly launch` / `fly deploy`; the user creates the Fly.io account and signs in (`fly auth login`)
+- [ ] Update `AGENTS.md` and `CLAUDE.md` ("runs locally" becomes "runs locally or on Fly.io"), `backend/AGENTS.md`, `scripts/AGENTS.md` if a deploy script is added, and a minimal root `README.md` with the public URL, how to deploy, and that the demo account is shared by every visitor and its board is reset on every restart or deploy
+
+Tests:
+- Backend: with `COOKIE_SECURE=1`, register and login set a `Secure` cookie; without it they do not. After the demo board is changed, restarting the app (re-entering the lifespan on the same database) restores it; other users' boards are untouched.
+- E2E: the existing suite passes against the public URL with `BASE_URL=https://<app>.fly.dev npm run test:e2e` (sign up, add, edit, move, delete cards, persistence after reload).
+- Manual: data survives a redeploy (volume), and `/api/health` is green in the Fly.io dashboard.
+
+Success criteria: no open findings from the code review; the app is reachable over HTTPS at the public URL; all backend, unit and e2e tests pass (e2e against the public URL); boards persist across deploys.

@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import os
 import secrets
+import threading
 from typing import Annotated
 
 from fastapi import Cookie, Depends, HTTPException, Request, Response, status
@@ -11,12 +12,15 @@ SESSION_COOKIE = "session"
 # OWASP minimum for scrypt; needs ~128 MB, above hashlib's default maxmem.
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 2**17, 8, 1
 SCRYPT_MAXMEM = 2**28
+# At most this many hashes run at once, so concurrent sign ins cannot exhaust memory.
+_scrypt_slots = threading.BoundedSemaphore(4)
 
 
 def _scrypt(password: str, salt: bytes, n: int, r: int, p: int) -> bytes:
-    return hashlib.scrypt(
-        password.encode(), salt=salt, n=n, r=r, p=p, dklen=64, maxmem=SCRYPT_MAXMEM
-    )
+    with _scrypt_slots:
+        return hashlib.scrypt(
+            password.encode(), salt=salt, n=n, r=r, p=p, dklen=64, maxmem=SCRYPT_MAXMEM
+        )
 
 
 def hash_password(password: str) -> str:
@@ -25,7 +29,12 @@ def hash_password(password: str) -> str:
     return f"scrypt${SCRYPT_N}${SCRYPT_R}${SCRYPT_P}${salt.hex()}${digest.hex()}"
 
 
-def verify_password(password: str, stored: str) -> bool:
+def verify_password(password: str, stored: str | None) -> bool:
+    # Without a stored hash (unknown username), still hash once so the response takes
+    # as long as for a wrong password and does not reveal which usernames exist.
+    if stored is None:
+        _scrypt(password, bytes(16), SCRYPT_N, SCRYPT_R, SCRYPT_P)
+        return False
     _, n, r, p, salt, digest = stored.split("$")
     candidate = _scrypt(password, bytes.fromhex(salt), int(n), int(r), int(p))
     return hmac.compare_digest(candidate, bytes.fromhex(digest))
