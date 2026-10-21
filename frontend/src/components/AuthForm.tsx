@@ -38,8 +38,8 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6">
-      <section className="w-full max-w-sm rounded-[32px] border border-[var(--stroke)] bg-white/80 p-8 shadow-[var(--shadow)]">
+    <main className="flex min-h-screen items-center justify-center px-6 py-10">
+      <section className="w-full max-w-sm rounded-[32px] border border-[var(--stroke)] bg-white/80 px-8 py-7 shadow-[var(--shadow)]">
         <div className="h-2 w-10 rounded-full bg-[var(--accent)]" />
         <h1 className="mt-4 font-display text-3xl font-semibold text-[var(--heading)]">
           My Kanban
@@ -49,26 +49,27 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
         </p>
 
         {isSignIn && (
-          <div className="mt-6 rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] px-4 py-3 text-center text-sm text-[var(--muted)]">
-            Just looking? Try the demo account{" "}
-            <span className="whitespace-nowrap font-semibold text-[var(--heading)]">
-              user / password
-            </span>
-            .
+          <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--muted)]">
+            <p>
+              Just looking? Try{" "}
+              <span className="whitespace-nowrap font-semibold text-[var(--heading)]">
+                user / password
+              </span>
+            </p>
             <button
               type="button"
               onClick={() => {
                 setUsername("user");
                 setPassword("password");
               }}
-              className="mx-auto mt-2 block rounded-full border border-[var(--primary)] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--primary)] transition hover:border-[var(--candy-5)] hover:bg-[var(--candy-5)] hover:text-[var(--heading)]"
+              className="shrink-0 rounded-full border border-[var(--primary)] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--primary)] transition hover:border-[var(--candy-5)] hover:bg-[var(--candy-5)] hover:text-[var(--heading)]"
             >
               Use demo account
             </button>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-3">
           <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
             Username
             <input
@@ -107,13 +108,13 @@ export const AuthForm = ({ onSignedIn }: AuthFormProps) => {
         <button
           type="button"
           onClick={toggleMode}
-          className="mt-4 w-full text-sm font-semibold text-[var(--primary)]"
+          className="mt-3 w-full text-sm font-semibold text-[var(--primary)]"
         >
           {isSignIn ? "New here? Create an account" : "Already have an account? Sign in"}
         </button>
 
-        <p className="mt-6 text-center text-xs text-[var(--muted)]">
-          This is a demo: accounts and boards are reset from time to time.
+        <p className="mt-4 text-center text-xs text-[var(--muted)]">
+          Demo app: data is reset from time to time.
         </p>
       </section>
     </main>

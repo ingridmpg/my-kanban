@@ -156,7 +156,7 @@ Checklist:
 - [x] Sign in screen says that demo data is reset from time to time
 - [x] `render.yaml` (Blueprint): Docker runtime, free plan, health check on `/api/health`, `COOKIE_SECURE=1`, `PORT=8000`
 - [ ] First deploy: the user creates the Render account, pushes to GitHub and creates the Blueprint from the repo
-- [ ] Update `AGENTS.md` and `CLAUDE.md` ("runs locally" becomes "runs locally or on Render"), `backend/AGENTS.md`, `frontend/AGENTS.md`, and a minimal root `README.md` with the public URL, how to deploy, the cold start, and that data (including the demo board) is reset on every restart or deploy
+- [x] Update `AGENTS.md` and `CLAUDE.md` ("runs locally" becomes "runs locally or on Render"), `backend/AGENTS.md`, `frontend/AGENTS.md`, and a root `README.md` (screenshot in `docs/screenshot.png`, stack, tests, link to this plan) with the public URL, how to deploy, the cold start, and that data (including the demo board) is reset on every restart or deploy
 
 Tests:
 - Backend: with `COOKIE_SECURE=1`, register and login set a `Secure` cookie; without it they do not. After the demo board is changed, restarting the app restores it; other users' boards survive a restart (locally, on the Docker volume). At most 2 hashes run at once.
