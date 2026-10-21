@@ -155,7 +155,7 @@ Checklist:
 - [x] At most 2 scrypt hashes at once (512 MB)
 - [x] Sign in screen says that demo data is reset from time to time
 - [x] `render.yaml` (Blueprint): Docker runtime, free plan, health check on `/api/health`, `COOKIE_SECURE=1`, `PORT=8000`
-- [ ] First deploy: the user creates the Render account, pushes to GitHub and creates the Blueprint from the repo
+- [x] First deploy: the user creates the Render account, pushes to GitHub and creates the Blueprint from the repo (live at https://ingrid-kanban.onrender.com on 2026-10-21; e2e suite passes against it)
 - [x] Update `AGENTS.md` and `CLAUDE.md` ("runs locally" becomes "runs locally or on Render"), `backend/AGENTS.md`, `frontend/AGENTS.md`, and a root `README.md` (screenshot in `docs/screenshot.png`, stack, tests, link to this plan) with the public URL, how to deploy, the cold start, and that data (including the demo board) is reset on every restart or deploy
 
 Tests:

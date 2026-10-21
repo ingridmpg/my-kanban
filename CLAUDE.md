@@ -54,7 +54,7 @@ A Project Management MVP web app:
 
 ## Current state
 
-Parts 1-7 of `docs/PLAN.md` are done; Part 8 (code review and deploy to the Render free plan, `render.yaml`) is approved and in progress. The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000`, started and stopped with the scripts in `scripts/` (SQLite on the `my-kanban-data` volume); backend tests run with `docker run --rm my-kanban pytest`. Users sign up or sign in (demo account `user` / `password`) and get their own persistent board.
+All parts of `docs/PLAN.md` are done. The app is live at https://ingrid-kanban.onrender.com (Render free plan, `render.yaml`; every push to `main` deploys). The Docker container builds the frontend as a static export and serves it from FastAPI at `http://localhost:8000`, started and stopped with the scripts in `scripts/` (SQLite on the `my-kanban-data` volume); backend tests run with `docker run --rm my-kanban pytest`. Users sign up or sign in (demo account `user` / `password`) and get their own persistent board.
 
 ## Frontend commands
 
